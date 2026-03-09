@@ -12,7 +12,7 @@ claude-shadow-context 把“蓝图优先 / 影子架构”工作方法产品化�
 
 ```bash
 /plugin marketplace add https://github.com/zj669/claude-shadow-context.git
-/plugin install claude-shadow-context
+/plugin install claude-shadow-context@claude-shadow-context
 ```
 
 ### 2. 初始化项目
