@@ -35,7 +35,7 @@ description: 探索和熟悉代码上下文，从业务入口快速收敛到最�
 - 不直接加载整个 `.blueprint/`
 - 不跳过根入口直接散搜代码
 - 蓝图足够时，不继续扩读
-- 找不到蓝图时，提示先执行 `/bluefirst-plugin:init`
+- 找不到蓝图时，提示先执行 `/claude-shadow-context:init`
 
 ## 输出结果
 

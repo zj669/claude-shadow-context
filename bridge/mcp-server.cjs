@@ -15,6 +15,7 @@ function sendResponse(response) {
 rl.on('line', (line) => {
   try {
     const request = JSON.parse(line);
+    const hasId = Object.prototype.hasOwnProperty.call(request, 'id');
 
     if (request.method === 'initialize') {
       sendResponse({
@@ -27,7 +28,7 @@ rl.on('line', (line) => {
             resources: {}
           },
           serverInfo: {
-            name: 'bluefirst',
+            name: 'claude-shadow-context',
             version: '0.1.0'
           }
         }
@@ -48,7 +49,7 @@ rl.on('line', (line) => {
           resources: []
         }
       });
-    } else {
+    } else if (hasId) {
       sendResponse({
         jsonrpc: '2.0',
         id: request.id,

@@ -1,7 +1,7 @@
-const reminder = 'Bluefirst 插件提醒：需要熟悉代码上下文时，优先使用 /bluefirst-plugin:explore 探索相关蓝图；若本轮涉及代码改动，结束前请补做 /bluefirst-plugin:sync。';
+const reminder = 'claude-shadow-context 提醒：需要熟悉代码上下文时，优先使用 /claude-shadow-context:explore 探索相关蓝图；若本轮涉及代码改动，结束前请补做 /claude-shadow-context:sync。';
 
 function shouldSkip(prompt) {
-  return /(^|\s)(\/bluefirst-plugin:explore|explore\b)/.test(prompt) || /\.blueprint[\\/]/.test(prompt);
+  return /(^|\s)(\/claude-shadow-context:explore|explore\b)/.test(prompt) || /\.blueprint[\\/]/.test(prompt);
 }
 
 function main(rawInput) {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-Bluefirst 是一个 Claude Code 插件，将"蓝图优先/影子架构"工作方法产品化为可安装的插件运行时。插件化的对象不是文档本身，而是**协议和流程**——让 AI 在修改代码前后都遵守"蓝图优先协议"。
+claude-shadow-context 是一个 Claude Code 插件，将"蓝图优先/影子架构"工作方法产品化为可安装的插件运行时。插件化的对象不是文档本身，而是**协议和流程**——让 AI 在修改代码前后都遵守"蓝图优先协议"。
 
 ## 核心架构
 
@@ -18,7 +18,7 @@ Bluefirst 是一个 Claude Code 插件，将"蓝图优先/影子架构"工作方
 
 2. **Hooks 层** (`hooks/hooks.json`)：将"蓝图优先"从建议变成约束
    - `UserPromptSubmit`：提醒优先使用 explore 探索蓝图上下文
-   - `Stop`：agent 结束时联动 sync 与 check
+   - `SubagentStop`：子代理结束时联动 sync
 
 3. **MCP 层** (`.mcp.json` + `bridge/`)：承载结构化能力
    - 当前 `bridge/mcp-server.cjs` 是占位实现
@@ -65,6 +65,8 @@ Bluefirst 是一个 Claude Code 插件，将"蓝图优先/影子架构"工作方
 - 插件不替代项目代码，而是守护"蓝图优先协议"
 - `files/` 镜像层适合作为检索增强层，不是默认主上下文
 - 第一版只做轻量提醒与一次性收尾阻断，避免复杂自动化误判
+- hook 命令依赖本机可执行 `node`
+- hook 中使用的相对路径依赖插件目录结构保持不变
 
 ## 文档参考
 

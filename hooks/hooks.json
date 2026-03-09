@@ -1,5 +1,5 @@
 {
-  "description": "Bluefirst plugin hooks",
+  "description": "claude-shadow-context hooks",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -8,7 +8,7 @@
             "type": "command",
             "command": "node \"./scripts/remind-load.mjs\"",
             "timeout": 10,
-            "statusMessage": "Bluefirst：补充蓝图优先上下文"
+            "statusMessage": "claude-shadow-context：补充蓝图优先上下文"
           }
         ]
       }
@@ -18,9 +18,9 @@
         "hooks": [
           {
             "type": "agent",
-            "prompt": "使用 /bluefirst-plugin:sync 同步本次会话中修改的代码文件的蓝图。只同步架构意图层面的变更，保持蓝图简洁。",
+            "prompt": "使用 /claude-shadow-context:sync 同步本次会话中修改的代码文件的蓝图。只同步架构意图层面的变更，保持蓝图简洁。",
             "timeout": 300,
-            "statusMessage": "Bluefirst：子代理同步蓝图"
+            "statusMessage": "claude-shadow-context：子代理同步蓝图"
           }
         ]
       }

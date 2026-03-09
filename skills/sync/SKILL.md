@@ -19,7 +19,7 @@ description: 代码已经修改，需要把有意义的实现变化按轻重分�
 4. 普通文件优先更新 `Metadata`、职责摘要和变更记录。
 5. 核心业务文件按实际变更更新关键方法单元，包括 `purpose`、`input`、`output`、`core_steps`。
 6. 处理新增、删除、重命名带来的蓝图结构变化。
-7. 输出同步结果，并提示是否需要继续执行 `/bluefirst-plugin:check`。
+7. 输出同步结果，并提示是否需要继续执行 `/claude-shadow-context:check`。
 
 ## 规则
 

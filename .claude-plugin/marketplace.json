@@ -1,7 +1,7 @@
 {
-  "name": "bluefirst-plugin",
-  "author": "bluefirst",
-  "repository": "https://github.com/YOUR_USERNAME/bluefirst",
-  "homepage": "https://github.com/YOUR_USERNAME/bluefirst",
+  "name": "claude-shadow-context",
+  "author": "zj669",
+  "repository": "https://github.com/zj669/claude-shadow-context",
+  "homepage": "https://github.com/zj669/claude-shadow-context",
   "description": "蓝图优先 Claude Code 插件 - 让 AI 在修改代码前后都遵守蓝图优先协议"
 }

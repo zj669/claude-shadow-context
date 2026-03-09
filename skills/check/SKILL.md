@@ -117,7 +117,7 @@ description: 检查蓝图与代码是否一致，并提示待同步问题
 无
 
 ### 修复建议
-1. 运行 `/bluefirst-plugin:sync` 同步以下文件的蓝图：
+1. 运行 `/claude-shadow-context:sync` 同步以下文件的蓝图：
    - src/auth/auth.service.ts
    - src/auth/jwt.util.ts
 2. 为新增文件创建蓝图：
@@ -134,4 +134,4 @@ description: 检查蓝图与代码是否一致，并提示待同步问题
 - 检查不应该阻塞工作流，只提供建议
 - 关注架构意图层面的一致性，不是代码细节
 - 允许合理的滞后（小的重构不需要立即同步蓝图）
-- 如果发现大量不一致，建议重新运行 `/bluefirst-plugin:init`
+- 如果发现大量不一致，建议重新运行 `/claude-shadow-context:init`

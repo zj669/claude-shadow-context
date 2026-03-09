@@ -1,9 +1,9 @@
 {
-  "name": "bluefirst-plugin",
+  "name": "claude-shadow-context",
   "version": "0.1.0",
   "description": "蓝图优先 Claude Code 插件骨架",
   "mcpServers": {
-    "bluefirst": {
+    "claude-shadow-context": {
       "command": "node",
       "args": [
         "./bridge/mcp-server.cjs"

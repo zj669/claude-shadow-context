@@ -22,7 +22,7 @@ test('空输入时静默退出', () => {
 });
 
 test('已包含 explore 命令时跳过提醒', () => {
-  const result = runHook(JSON.stringify({ prompt: '请先执行 /bluefirst-plugin:explore 再说' }));
+  const result = runHook(JSON.stringify({ prompt: '请先执行 /claude-shadow-context:explore 再说' }));
   assert.equal(result.status, 0);
   assert.equal(result.stdout, '');
 });
@@ -39,6 +39,6 @@ test('普通提示词时输出额外上下文', () => {
   const payload = JSON.parse(result.stdout);
   assert.equal(
     payload.additionalContext,
-    'Bluefirst 插件提醒：需要熟悉代码上下文时，优先使用 /bluefirst-plugin:explore 探索相关蓝图；若本轮涉及代码改动，结束前请补做 /bluefirst-plugin:sync。'
+    'claude-shadow-context 提醒：需要熟悉代码上下文时，优先使用 /claude-shadow-context:explore 探索相关蓝图；若本轮涉及代码改动，结束前请补做 /claude-shadow-context:sync。'
   );
 });
