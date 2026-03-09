@@ -1,0 +1,7 @@
+{
+  "name": "bluefirst-plugin",
+  "author": "bluefirst",
+  "repository": "https://github.com/YOUR_USERNAME/bluefirst",
+  "homepage": "https://github.com/YOUR_USERNAME/bluefirst",
+  "description": "蓝图优先 Claude Code 插件 - 让 AI 在修改代码前后都遵守蓝图优先协议"
+}

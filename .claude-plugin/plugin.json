@@ -1,0 +1,13 @@
+{
+  "name": "bluefirst-plugin",
+  "version": "0.1.0",
+  "description": "蓝图优先 Claude Code 插件骨架",
+  "mcpServers": {
+    "bluefirst": {
+      "command": "node",
+      "args": [
+        "./bridge/mcp-server.cjs"
+      ]
+    }
+  }
+}
