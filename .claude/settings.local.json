@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-shadow-context": {
+      "source": {
+        "source": "directory",
+        "path": "E:\\WorkSpace\\repo\\bluefirst"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "claude-shadow-context@claude-shadow-context": true
+  }
+}
