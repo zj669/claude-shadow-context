@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "claude-shadow-context",
-  "description": "蓝图优先 Claude Code 插件市场源",
+  "description": "通过蓝图压缩上下文并保持人机共享理解对齐",
   "owner": {
     "name": "zj669",
     "email": "zj669@users.noreply.github.com"
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "claude-shadow-context",
-      "description": "蓝图优先 Claude Code 插件 - 让 AI 在修改代码前后都遵守蓝图优先协议",
+      "description": "蓝图驱动的人机共识层：先用蓝图理解项目，再在结束时检查蓝图是否仍对齐",
       "version": "0.1.0",
       "author": {
         "name": "zj669",
@@ -21,7 +21,7 @@
       "tags": [
         "blueprint",
         "context",
-        "workflow"
+        "alignment"
       ]
     }
   ],

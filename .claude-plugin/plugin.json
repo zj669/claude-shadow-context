@@ -1,7 +1,7 @@
 {
   "name": "claude-shadow-context",
   "version": "0.1.0",
-  "description": "蓝图优先 Claude Code 插件骨架",
+  "description": "蓝图驱动的人机共识层",
   "mcpServers": {
     "claude-shadow-context": {
       "command": "node",
