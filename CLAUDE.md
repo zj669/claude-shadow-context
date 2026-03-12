@@ -1,75 +1,76 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with this repository.
 
 ## 项目概述
 
-claude-shadow-context 是一个 Claude Code 插件，将"蓝图优先/影子架构"工作方法产品化为可安装的插件运行时。插件化的对象不是文档本身，而是**协议和流程**——让 AI 在修改代码前后都遵守"蓝图优先协议"。
+`claude-shadow-context` 是一个蓝图驱动的人机共识层。
 
-## 核心架构
+它不再追求成为完整的 Claude 工作流框架，而是聚焦在两个更小、更核心的问题：
 
-插件采用三层组合架构：
+1. 让 AI 在更短上下文中理解项目结构、职责与架构意图
+2. 让这种理解在任务结束后仍然保持可信
 
-1. **Skills 层** (`skills/`)：提供 4 个用户可调用的入口
-   - `init`：初始化项目的 `.blueprint/` 基础结构
-   - `explore`：探索和熟悉代码上下文，加载相关蓝图（适用于任何需要理解代码的场景）
-   - `sync`：代码修改后同步蓝图内容
-   - `check`：检查蓝图与代码一致性，识别架构漂移
+换句话说，这个项目关注的是 **shared understanding**，而不是大而全的 agent orchestration。
 
-2. **Hooks 层** (`hooks/hooks.json`)：将"蓝图优先"从建议变成约束
-   - `UserPromptSubmit`：提醒优先使用 explore 探索蓝图上下文
-   - `SubagentStop`：子代理结束时联动 sync
+## 核心能力
 
-3. **MCP 层** (`.mcp.json` + `bridge/`)：承载结构化能力
-   - 当前 `bridge/mcp-server.cjs` 是占位实现
-   - 未来将承载索引、校验、投影、漂移检测能力
+当前版本只围绕两个原语组织：
 
-## 蓝图模板结构
+1. **`explore`** (`skills/explore/`)
+   - 在进入任务前，优先通过蓝图收敛最相关上下文
+   - 阅读顺序应为：根入口 → 业务入口 → 精准蓝图 → 必要代码
+   - 目标是用最少上下文获得足够准确的项目理解
 
-插件提供两个核心模板（`templates/`）：
+2. **`align`** (`skills/align/`)
+   - 在任务结束、会话结束、准备提交前，检查蓝图是否仍与代码对齐
+   - 输入可以来自会话上下文、修改文件以及 `git diff` / `git log`
+   - 目标是识别蓝图漂移，并在必要时做轻量同步
 
-- `meta.md`：极简通用蓝图模板，包含 Metadata、关键方法单元、变更记录
-- `overview.md`：项目总览蓝图模板，包含项目目标、核心结构、关键方法单元
+## Hooks 架构
 
-每个蓝图文件应包含统一元数据：
-- `title`：蓝图标题
-- `type`：类型（overview | module | flow | class | method）
-- `summary`：主要能力描述
+插件默认只保留 3 个 hook：
 
-关键方法单元格式：
-- `location`：代码位置
-- `purpose`：存在目的
-- `input`/`output`：输入输出
-- `core_steps`：核心步骤
+1. **`UserPromptSubmit`**
+   - 当用户开始分析项目或修改代码时，提醒优先使用 `explore`
+
+2. **`SubagentStart`**
+   - 当子 agent 启动时，注入同样的蓝图优先上下文
+
+3. **`SessionEnd`**
+   - 当会话结束时异步触发对齐检查入口，为下一次进入任务保留“先检查蓝图”的提醒
 
 ## 设计原则
 
-1. **先瘦后胖**：第一版只做最小闭环（初始化、探索、同步、检查）
-2. **协议优先**：插件是 Blueprint Runtime，不是文档包
-3. **最小上下文**：不要把整个 `.blueprint/` 全部加载，按需加载 1-3 个相关文件
-4. **漂移检测**：代码改动后必须检查蓝图是否需要同步
+1. **蓝图优先**：优先读取意图层，而不是先散搜实现层
+2. **最小上下文**：读取所有相关蓝图（蓝图本身就是精简的意图层），只在必要时补看代码
+3. **结束对齐**：每次任务结束都应考虑蓝图是否仍然可信
+4. **轻量协议**：不追求完整框架，只保留最小闭环
 
-## 工作流建议
+## 重要边界
 
-**重要：修改本项目代码前，请先查看 `.blueprint/` 目录下的蓝图文件，理解架构意图后再动手。**
+- 这个项目不做通用 memory 系统
+- 不做多角色 agent 平台
+- 不做全家桶式自动化编排
+- 不试图替代业务项目本身的代码结构
 
-标准蓝图优先工作流：
-1. 收到需求 → 使用 `explore` 探索相关蓝图上下文
-2. 理解架构意图 → 定位需要修改的代码
-3. 修改代码 → 使用 `sync` 同步蓝图
-4. 完成任务 → 使用 `check` 检查一致性
+它的职责只有两件事：
+- 帮助 AI 更快理解项目
+- 帮助人和 AI 共同维护这份理解
 
-## 重要约束
+## 代码关注点
 
-- `.blueprint/` 是项目的架构意图层，由各项目自己维护
-- 插件不替代项目代码，而是守护"蓝图优先协议"
-- `files/` 镜像层适合作为检索增强层，不是默认主上下文
-- 第一版只做轻量提醒与一次性收尾阻断，避免复杂自动化误判
-- hook 命令依赖本机可执行 `node`
-- hook 中使用的相对路径依赖插件目录结构保持不变
+当你修改这个仓库时，优先关注以下文件：
 
-## 文档参考
+- `README.md`：对外定位与使用说明
+- `hooks/hooks.json`：3 个 hook 的生命周期设计
+- `scripts/remind-load.mjs`：用户提示词与子 agent 的蓝图提醒
+- `scripts/session-align.mjs`：会话结束时的对齐入口
+- `skills/explore/SKILL.md`：探索协议
+- `skills/align/SKILL.md`：对齐协议
 
-- `docs/2026-03-08-claude-plugin-structure.md`：插件目录结构设计
-- `docs/2026-03-08-blueprint-plugin-thoughts.md`：设计理念和判断
-- `docs/plans/2026-03-08-plugin-skeleton.md`：实现计划
+## 当前实现状态
+
+- `explore` 与 `align` 是主心智模型
+- `bridge/mcp-server.cjs` 仍是占位实现，不是当前产品重点
+- 如果未来需要更强的蓝图索引、映射、漂移检测，再考虑通过 MCP 扩展
