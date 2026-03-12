@@ -12,7 +12,18 @@ function safeParse(rawInput) {
 
 function main(rawInput) {
   safeParse(rawInput);
-  return '';
+  
+  const reminder = [
+    'claude-shadow-context 提醒：会话即将结束。',
+    '如果本轮涉及代码改动，建议使用 /claude-shadow-context:align 检查蓝图是否仍然对齐。'
+  ].join(' ');
+  
+  return JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: 'SessionEnd',
+      additionalContext: reminder
+    }
+  });
 }
 
 let rawInput = '';
