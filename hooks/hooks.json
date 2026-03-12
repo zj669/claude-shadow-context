@@ -6,21 +6,34 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"./scripts/remind-load.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/remind-load.mjs\" user-prompt",
             "timeout": 10,
-            "statusMessage": "claude-shadow-context：补充蓝图优先上下文"
+            "statusMessage": "claude-shadow-context：提示优先通过蓝图探索上下文"
           }
         ]
       }
     ],
-    "SubagentStop": [
+    "SubagentStart": [
       {
         "hooks": [
           {
-            "type": "agent",
-            "prompt": "使用 /claude-shadow-context:sync 同步本次会话中修改的代码文件的蓝图。只同步架构意图层面的变更，保持蓝图简洁。",
-            "timeout": 300,
-            "statusMessage": "claude-shadow-context：子代理同步蓝图"
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/remind-load.mjs\" subagent-start",
+            "timeout": 10,
+            "statusMessage": "claude-shadow-context：为子 agent 注入蓝图优先上下文"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-align.mjs\"",
+            "timeout": 30,
+            "async": true,
+            "statusMessage": "claude-shadow-context：会话结束时异步检查蓝图对齐入口"
           }
         ]
       }
