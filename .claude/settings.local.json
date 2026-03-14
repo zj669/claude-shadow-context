@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(node --test scripts/remind-load.test.mjs scripts/session-align.test.mjs scripts/mcp-server.test.cjs)",
+      "Bash(node:*)"
+    ]
+  },
   "enabledPlugins": {
     "claude-shadow-context@claude-shadow-context": true
   },
@@ -9,10 +15,5 @@
         "path": "E:\\WorkSpace\\repo\\bluefirst"
       }
     }
-  },
-  "permissions": {
-    "allow": [
-      "Bash(node --test scripts/remind-load.test.mjs scripts/session-align.test.mjs scripts/mcp-server.test.cjs)"
-    ]
   }
 }

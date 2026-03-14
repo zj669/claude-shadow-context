@@ -33,6 +33,12 @@ test('用户提示词已包含 blueprint 路径时跳过提醒，兼容反斜杠
   assert.equal(result.stdout, '');
 });
 
+test('用户提示词已包含 init 命令时跳过提醒', () => {
+  const result = runHook(['user-prompt'], JSON.stringify({ prompt: '请执行 /claude-shadow-context:init 初始化蓝图' }));
+  assert.equal(result.status, 0);
+  assert.equal(result.stdout, '');
+});
+
 test('普通用户提示词时输出 explore 与 align 提醒', () => {
   const result = runHook(['user-prompt'], JSON.stringify({ prompt: '帮我熟悉这个项目' }));
   assert.equal(result.status, 0);

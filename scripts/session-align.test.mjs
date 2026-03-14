@@ -15,14 +15,18 @@ function runHook(input) {
   });
 }
 
-test('SessionEnd 脚本在空输入时静默退出', () => {
+test('SessionEnd 脚本在空输入时输出对齐提醒', () => {
   const result = runHook('');
   assert.equal(result.status, 0);
-  assert.equal(result.stdout, '');
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.hookSpecificOutput.hookEventName, 'SessionEnd');
+  assert.match(payload.hookSpecificOutput.additionalContext, /\/claude-shadow-context:align/);
 });
 
-test('SessionEnd 脚本在合法 JSON 输入时保持静默', () => {
+test('SessionEnd 脚本在合法 JSON 输入时输出对齐提醒', () => {
   const result = runHook(JSON.stringify({ source: 'SessionEnd', session_id: 'abc' }));
   assert.equal(result.status, 0);
-  assert.equal(result.stdout, '');
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.hookSpecificOutput.hookEventName, 'SessionEnd');
+  assert.match(payload.hookSpecificOutput.additionalContext, /\/claude-shadow-context:align/);
 });

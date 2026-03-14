@@ -20,9 +20,13 @@ claude-shadow-context 是一个轻量的 Claude Code 插件。
 /plugin install claude-shadow-context@claude-shadow-context
 ```
 
-### 2. 准备蓝图层
+### 2. 初始化蓝图层
 
-如果项目还没有蓝图层，需要先建立 `.blueprint/` 结构，作为代码之外的意图层。
+```bash
+/claude-shadow-context:init
+```
+
+如果项目还没有蓝图层，使用 init 初始化 `.blueprint/` 结构，作为代码之外的意图层。
 
 ### 3. 开始使用
 
@@ -33,9 +37,10 @@ claude-shadow-context 是一个轻量的 Claude Code 插件。
 之后围绕下面这条最小工作流使用即可：
 
 ```text
-explore → 修改代码 → align
+init → explore → 修改代码 → align
 ```
 
+- `init`：为项目初始化蓝图层（只需执行一次）
 - `explore`：动手前先用蓝图收敛最相关上下文
 - `align`：结束前根据会话和代码变化检查蓝图是否仍然对齐
 
@@ -43,10 +48,11 @@ explore → 修改代码 → align
 
 claude-shadow-context 不再追求做一个完整的 Claude 工作流框架。
 
-它现在只解决两件事：
+它现在只解决三件事：
 
-1. **探索压缩**：让 AI 在探索上下文时优先通过蓝图理解项目，而不是先散搜代码
-2. **结束对齐**：让 AI 在会话结束或提交前检查蓝图是否仍与代码一致
+1. **蓝图初始化**：为项目建立蓝图层，渐进式生成根蓝图和模块入口蓝图
+2. **探索压缩**：让 AI 在探索上下文时优先通过蓝图理解项目，而不是先散搜代码
+3. **结束对齐**：让 AI 在会话结束或提交前检查蓝图是否仍与代码一致
 
 这意味着它更像一个 **Blueprint Alignment Layer**，而不是一个全家桶式 AI 开发生态。
 
@@ -94,18 +100,25 @@ claude-shadow-context 解决的是两个具体问题：
 
 | 指令 | 作用 | 使用时机 |
 | --- | --- | --- |
+| `/claude-shadow-context:init` | 为项目初始化蓝图层，生成根蓝图和模块入口蓝图 | 项目首次使用、大型项目中途介入时 |
 | `/claude-shadow-context:explore` | 优先通过蓝图收敛最相关项目上下文 | 分析需求、修复问题、开发功能前 |
 | `/claude-shadow-context:align` | 根据会话与代码变化检查蓝图是否仍对齐，必要时给出同步建议 | 任务结束前、提交前 |
 
 ## 最小能力模型
 
-### 1. `explore`
+### 1. `init`
+
+- 扫描项目结构，识别模块边界
+- 生成根蓝图（`.blueprint/README.md`）和模块入口蓝图
+- 渐进式策略：文件级蓝图交给 explore 按需生成
+
+### 2. `explore`
 
 - 从根入口收敛到最相关的业务蓝图
 - 读取所有相关蓝图（蓝图本身就是精简的意图层）
 - 只有蓝图不足时，再补看少量代码
 
-### 2. `align`
+### 3. `align`
 
 - 基于本轮会话、修改文件和 `git diff` 判断是否存在蓝图漂移
 - 区分“无需更新 / 需要补记录 / 需要修正职责或关键方法单元”

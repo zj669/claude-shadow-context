@@ -15,14 +15,24 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## 核心能力
 
-当前版本只围绕两个原语组织：
+当前版本围绕三个原语组织：
 
-1. **`explore`** (`skills/explore/`)
+1. **`init`** (`skills/init/`)
+   - 为项目初始化蓝图层，生成根蓝图和模块入口蓝图
+   - 渐进式生成：文件级蓝图由 explore 按需补齐
+   - 适用于新项目或大型项目中途介入
+
+2. **`explore`** (`skills/explore/`)
    - 在进入任务前，优先通过蓝图收敛最相关上下文
    - 阅读顺序应为：根入口 → 业务入口 → 精准蓝图 → 必要代码
    - 目标是用最少上下文获得足够准确的项目理解
 
-2. **`align`** (`skills/align/`)
+2. **`explore`** (`skills/explore/`)
+   - 在进入任务前，优先通过蓝图收敛最相关上下文
+   - 阅读顺序应为：根入口 → 业务入口 → 精准蓝图 → 必要代码
+   - 目标是用最少上下文获得足够准确的项目理解
+
+3. **`align`** (`skills/align/`)
    - 在任务结束、会话结束、准备提交前，检查蓝图是否仍与代码对齐
    - 输入可以来自会话上下文、修改文件以及 `git diff` / `git log`
    - 目标是识别蓝图漂移，并在必要时做轻量同步
@@ -66,11 +76,12 @@ This file provides guidance to Claude Code when working with this repository.
 - `hooks/hooks.json`：3 个 hook 的生命周期设计
 - `scripts/remind-load.mjs`：用户提示词与子 agent 的蓝图提醒
 - `scripts/session-align.mjs`：会话结束时的对齐入口
+- `skills/init/SKILL.md`：初始化协议
 - `skills/explore/SKILL.md`：探索协议
 - `skills/align/SKILL.md`：对齐协议
 
 ## 当前实现状态
 
-- `explore` 与 `align` 是主心智模型
+- `init`、`explore` 与 `align` 是主心智模型
 - `bridge/mcp-server.cjs` 仍是占位实现，不是当前产品重点
 - 如果未来需要更强的蓝图索引、映射、漂移检测，再考虑通过 MCP 扩展

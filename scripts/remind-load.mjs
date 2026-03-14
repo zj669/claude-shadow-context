@@ -3,7 +3,8 @@ const mode = process.argv[2] || 'user-prompt';
 const userPromptReminder = [
   'claude-shadow-context 提醒：需要熟悉代码上下文时，优先使用 /claude-shadow-context:explore。',
   '先通过蓝图理解职责、边界和关键方法，再补看少量代码。',
-  '若本轮涉及代码改动，结束前请使用 /claude-shadow-context:align 检查蓝图是否仍然对齐。'
+  '若本轮涉及代码改动，结束前请使用 /claude-shadow-context:align 检查蓝图是否仍然对齐。',
+  '若项目尚无 .blueprint/ 结构，建议先使用 /claude-shadow-context:init 初始化蓝图层。'
 ].join(' ');
 
 const subagentReminder = [
@@ -25,7 +26,7 @@ function safeParse(rawInput) {
 }
 
 function shouldSkipPrompt(prompt) {
-  return /(^|\s)(\/claude-shadow-context:explore|explore\b)/.test(prompt) || /\.blueprint[\\/]/.test(prompt);
+  return /(^|\s)(\/claude-shadow-context:(explore|init)|explore\b)/.test(prompt) || /\.blueprint[\\/]/.test(prompt);
 }
 
 function wrapAdditionalContext(hookEventName, additionalContext) {
