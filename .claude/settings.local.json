@@ -12,7 +12,7 @@
     "claude-shadow-context": {
       "source": {
         "source": "directory",
-        "path": "E:\\WorkSpace\\repo\\bluefirst"
+        "path": "/home/zj669/repo/claude-shadow-context"
       }
     }
   }

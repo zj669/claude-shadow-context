@@ -56,29 +56,6 @@ claude-shadow-context 不再追求做一个完整的 Claude 工作流框架。
 
 这意味着它更像一个 **Blueprint Alignment Layer**，而不是一个全家桶式 AI 开发生态。
 
-## Hook 运行前提
-
-当前插件中的 hook 通过 Node 脚本执行：
-
-- 需要用户机器上可执行 `node`
-- 推荐通过 `${CLAUDE_PLUGIN_ROOT}` 引用插件内脚本，避免工作目录变化导致路径失效
-- 本地用 `--plugin-dir` 验证时，应指向插件根目录；当前仓库应使用 `E:/WorkSpace/repo/bluefirst`，不要指向 `E:/WorkSpace/repo/bluefirst/.claude-plugin`
-
-推荐安装后至少验证一次：
-
-1. 安装插件
-2. 发送一个普通提示词
-3. 确认 `UserPromptSubmit` 会注入 explore 提醒
-4. 触发涉及代码修改的子代理任务
-5. 确认 `SubagentStart` 会注入同类蓝图提醒
-6. 确认 `SessionEnd` 会异步触发对齐提醒
-
-本地可用下面的方式验证 `UserPromptSubmit`：
-
-```bash
-claude -p --plugin-dir "E:/WorkSpace/repo/bluefirst" "请只回答：如果你收到了额外的 hook 提醒，就原样复述那段提醒；如果没有收到，就只回答 NO_HOOK_CONTEXT"
-```
-
 ## 什么是蓝图优先
 
 claude-shadow-context 的核心不是“多写文档”，而是：**让意图层成为 AI 的优先入口**。
@@ -113,7 +90,7 @@ claude-shadow-context 解决的是两个具体问题：
 - 渐进式策略：文件级蓝图交给 explore 按需生成
 
 ### 2. `explore`
-
+  
 - 从根入口收敛到最相关的业务蓝图
 - 读取所有相关蓝图（蓝图本身就是精简的意图层）
 - 只有蓝图不足时，再补看少量代码
