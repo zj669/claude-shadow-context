@@ -1,119 +1,92 @@
-# claude-shadow-context
+# bwflow
 
-> 通过蓝图压缩上下文，建立人和 AI 的共享项目理解。
-> 先用蓝图理解，再在结束时校验是否仍然对齐。
+> 蓝图驱动的结构化 AI 开发伴侣
 
-claude-shadow-context 是一个轻量的 Claude Code 插件。
-它不试图成为完整的 AI 开发框架，而是聚焦在一个更小也更关键的问题：
+bwflow 是一个 Blueprint Workflow CLI 工具，它将**蓝图优先**的理解心智与**结构化工作流**深度融合，帮助 AI 在更短上下文中理解项目，并在任务结束后保持理解可信。
 
-- 让 AI 在更短上下文里理解项目结构、职责和架构意图
-- 让这种理解在任务结束后仍然保持可信
+## 核心能力
 
-它约束的不是文档数量，而是 AI 理解和修改代码的方式。
+bwflow 围绕三个原语组织：
 
-## 快速安装和开始
+1. **init** — 为项目初始化蓝图层和工作流结构
+2. **explore** — 蓝图优先探索，用最小上下文获得足够准确的项目理解
+3. **align** — 任务结束后检查蓝图是否仍与代码对齐
 
-### 1. 安装插件
+加上从 Trellis 借鉴的：
 
-```bash
-/plugin marketplace add https://github.com/zj669/claude-shadow-context.git
-/plugin install claude-shadow-context@claude-shadow-context
-```
+4. **plan** — 需求分析，生成 PRD 和任务上下文
+5. **implement** — 实现阶段，Hook 自动注入蓝图和规范上下文
+6. **check** — 质量检查，Ralph Loop 守护直到达标
+7. **finish** — 收尾，align 蓝图 + 记录会话 + 同步规范
 
-### 2. 初始化蓝图层
+## 快速开始
 
-```bash
-/claude-shadow-context:init
-```
-
-如果项目还没有蓝图层，使用 init 初始化 `.blueprint/` 结构，作为代码之外的意图层。
-
-### 3. 开始使用
+### 安装
 
 ```bash
-/claude-shadow-context:explore
+npm install -g @zj669/bwflow
 ```
 
-之后围绕下面这条最小工作流使用即可：
+### 初始化项目
 
-```text
-init → explore → 修改代码 → align
+```bash
+cd my-project
+bw init -u your-name --targets claudecode,cursor
 ```
 
-- `init`：为项目初始化蓝图层（只需执行一次）
-- `explore`：动手前先用蓝图收敛最相关上下文
-- `align`：结束前根据会话和代码变化检查蓝图是否仍然对齐
+### 使用
 
-## 项目定位
+```bash
+/bwflow:init    # 初始化项目蓝图层
+/bwflow:explore # 探索项目上下文
+/bwflow:align   # 检查蓝图对齐
+```
 
-claude-shadow-context 不再追求做一个完整的 Claude 工作流框架。
+## 核心心智
 
-它现在只解决三件事：
+### Blueprint vs Spec
 
-1. **蓝图初始化**：为项目建立蓝图层，渐进式生成根蓝图和模块入口蓝图
-2. **探索压缩**：让 AI 在探索上下文时优先通过蓝图理解项目，而不是先散搜代码
-3. **结束对齐**：让 AI 在会话结束或提交前检查蓝图是否仍与代码一致
+bwflow 将项目知识分为两层：
 
-这意味着它更像一个 **Blueprint Alignment Layer**，而不是一个全家桶式 AI 开发生态。
+| 问题 | 答案来自 |
+|------|---------|
+| 这个模块负责什么？ | `bwflow/blueprint/` |
+| 代码应该怎么写？ | `bwflow/spec/` |
+| 遇到这个错误怎么办？ | `bwflow/evolved/` |
+| 这次修改是否偏离了原设计？ | `/bwflow:align` |
 
-## 什么是蓝图优先
+### 目录结构
 
-claude-shadow-context 的核心不是“多写文档”，而是：**让意图层成为 AI 的优先入口**。
+```
+{project}/
+├── bwflow/
+│   ├── blueprint/       ← 理解层（蓝图，回答"为什么"）
+│   │   ├── README.md
+│   │   └── {module}/
+│   ├── commands/        ← 命令协议
+│   │   ├── init/
+│   │   ├── explore/
+│   │   ├── align/
+│   │   └── ...
+│   ├── agents/          ← 多角色 Agent 模板
+│   ├── hooks/           ← 生命周期钩子
+│   ├── scripts/         ← Python 执行脚本
+│   ├── tasks/           ← 任务目录
+│   ├── workspace/       ← 会话日志
+│   ├── spec/            ← 编码规范（回答"怎么写"）
+│   └── evolved/         ← 自我学习技能
+├── packages/
+│   └── cli/             ← NPM CLI 工具
+└── .claude/             ← Claude Code 配置（CLI 自动生成）
+```
 
-- **代码** 是实现层，回答“怎么做”
-- **蓝图** 是意图层，回答“为什么这样做、职责是什么、边界在哪里”
+## 设计原则
 
-在真实项目里，代码会持续演化，但架构意图很容易丢失。久而久之，AI 只能根据局部代码猜测上下文，修改会越来越偏离原始设计。
+1. **蓝图优先**：优先读取意图层，而不是先散搜实现层
+2. **最小上下文**：蓝图足够时，不扩读实现细节
+3. **结束对齐**：每次任务结束都应考虑蓝图是否仍然可信
+4. **自我学习**：从失败中沉淀经验，形成可复用的 Evolved Skills
 
-claude-shadow-context 解决的是两个具体问题：
+## License
 
-- 进入任务前，先读取最相关的蓝图，压缩理解成本
-- 结束任务时，根据会话和代码变化检查蓝图是否发生漂移
-
-所以 claude-shadow-context 不是一个文档包，也不是一个完整框架，而是一个 **Blueprint Alignment Protocol**：
-它把“先通过蓝图理解，再在结束时确认蓝图仍可信”变成可执行的工作流协议。
-
-## 有哪些指令
-
-| 指令 | 作用 | 使用时机 |
-| --- | --- | --- |
-| `/claude-shadow-context:init` | 为项目初始化蓝图层，生成根蓝图和模块入口蓝图 | 项目首次使用、大型项目中途介入时 |
-| `/claude-shadow-context:explore` | 优先通过蓝图收敛最相关项目上下文 | 分析需求、修复问题、开发功能前 |
-| `/claude-shadow-context:align` | 根据会话与代码变化检查蓝图是否仍对齐，必要时给出同步建议 | 任务结束前、提交前 |
-
-## 最小能力模型
-
-### 1. `init`
-
-- 扫描项目结构，识别模块边界
-- 生成根蓝图（`.blueprint/README.md`）和模块入口蓝图
-- 渐进式策略：文件级蓝图交给 explore 按需生成
-
-### 2. `explore`
-  
-- 从根入口收敛到最相关的业务蓝图
-- 读取所有相关蓝图（蓝图本身就是精简的意图层）
-- 只有蓝图不足时，再补看少量代码
-
-### 3. `align`
-
-- 基于本轮会话、修改文件和 `git diff` 判断是否存在蓝图漂移
-- 区分“无需更新 / 需要补记录 / 需要修正职责或关键方法单元”
-- 在必要时执行轻量同步，而不是全量重写蓝图
-
-## Hooks 设计
-
-插件默认只保留 3 个 hook：
-
-1. `UserPromptSubmit`
-   - 当用户进入项目分析或代码修改任务时，提醒优先使用 `explore`
-2. `SubagentStart`
-   - 当子 agent 启动时，注入同样的蓝图优先上下文
-3. `SessionEnd`
-   - 会话结束时异步触发 `align` 提醒，确保结束阶段也考虑蓝图对齐
-
-## 可选 Git 集成
-
-如果希望在真实 `git commit` 前做蓝图对齐检查，建议额外提供一个可选的 `.git/hooks/pre-commit` 集成。
-
-这类检查不应依赖 Claude 会话是否仍然存活，而应作为独立补充能力存在。
+MIT

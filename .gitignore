@@ -1,5 +1,6 @@
 # temporary files
 .tmp/
+.claude-shadow-context/
 
 # dependencies
 node_modules/
