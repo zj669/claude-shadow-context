@@ -1,7 +1,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "python3 .bwflow/hooks/statusline.py"
+    "command": "python3 .claude/hooks/statusline.py"
   },
   "hooks": {
     "SessionStart": [
@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./bwflow/hooks/session-start.py",
+            "command": "python3 .claude/hooks/session-start.py",
             "timeout": 10
           }
         ]
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./bwflow/hooks/session-start.py",
+            "command": "python3 .claude/hooks/session-start.py",
             "timeout": 10
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./bwflow/hooks/session-start.py",
+            "command": "python3 .claude/hooks/session-start.py",
             "timeout": 10
           }
         ]
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./bwflow/hooks/inject-subagent-context.py",
+            "command": "python3 .claude/hooks/inject-subagent-context.py",
             "timeout": 30
           }
         ]
@@ -52,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./bwflow/hooks/inject-subagent-context.py",
+            "command": "python3 .claude/hooks/inject-subagent-context.py",
             "timeout": 30
           }
         ]
@@ -64,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./bwflow/hooks/ralph-loop.py",
+            "command": "python3 .claude/hooks/ralph-loop.py",
             "timeout": 10
           }
         ]

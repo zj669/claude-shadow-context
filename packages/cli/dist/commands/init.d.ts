@@ -3,6 +3,7 @@
  * 初始化 bwflow 结构到用户项目
  */
 interface InitOptions {
+    type?: string;
     yes?: boolean;
     force?: boolean;
 }
