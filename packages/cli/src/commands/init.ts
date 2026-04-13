@@ -17,18 +17,6 @@ interface InitOptions {
   force?: boolean;
 }
 
-// Trellis 命令映射到 bwflow
-const COMMAND_MAP: Record<string, string> = {
-  "trellis/start": "start",
-  "trellis/before-dev": "before-dev",
-  "trellis/finish-work": "finish",
-  "trellis/record-session": "record",
-  "trellis/brainstorm": "brainstorm",
-  "trellis/check": "check",
-  "trellis/parallel": "parallel",
-  "trellis/update-spec": "update-spec",
-};
-
 /**
  * 初始化 bwflow 结构
  */
@@ -209,8 +197,8 @@ function copyDirectoryRecursive(src: string, dest: string, cwd: string): void {
 async function syncCommandsToClaudeCode(cwd: string, templatesDir: string): Promise<void> {
   console.log(chalk.cyan("\n🔄 同步命令到 Claude Code...\n"));
 
-  const srcCommandsDir = join(templatesDir, "commands", "trellis");
-  const destCommandsDir = join(cwd, ".claude", "commands", "bwflow");
+  const srcCommandsDir = join(templatesDir, "commands");
+  const destCommandsDir = join(cwd, ".claude", "commands");
 
   if (!fs.existsSync(srcCommandsDir)) {
     console.log(chalk.yellow("  ⚠️  未找到命令模板"));
@@ -219,6 +207,7 @@ async function syncCommandsToClaudeCode(cwd: string, templatesDir: string): Prom
 
   fs.ensureDirSync(destCommandsDir);
 
+  // 直接复制 commands 目录下的所有子目录（不再做名称映射）
   const cmdDirs = fs.readdirSync(srcCommandsDir);
   let count = 0;
 
@@ -226,11 +215,7 @@ async function syncCommandsToClaudeCode(cwd: string, templatesDir: string): Prom
     const srcCmdDir = join(srcCommandsDir, cmdDir);
     if (!fs.statSync(srcCmdDir).isDirectory()) continue;
 
-    // 只复制映射中存在的命令
-    const mappedName = COMMAND_MAP[`trellis/${cmdDir}`];
-    if (!mappedName) continue;
-
-    const destCmdDir = join(destCommandsDir, mappedName);
+    const destCmdDir = join(destCommandsDir, cmdDir);
     fs.ensureDirSync(destCmdDir);
 
     const files = fs.readdirSync(srcCmdDir);
@@ -244,44 +229,5 @@ async function syncCommandsToClaudeCode(cwd: string, templatesDir: string): Prom
     }
   }
 
-  console.log(chalk.gray(`  ✓ ${count} 个命令 → .claude/commands/bwflow/`));
-
-  // 创建 README
-  const readmeContent = `# bwflow Commands
-
-Claude Code 集成 bwflow 协议命令。
-
-## 核心命令
-
-| 命令 | 说明 |
-|------|------|
-| \`/bw start\` | 开始会话 |
-| \`/bw before-dev\` | 开发前读取规范 |
-| \`/bw finish\` | 完成任务检查 |
-| \`/bw record\` | 记录会话 |
-
-## 完整命令列表
-
-| 命令 | 说明 |
-|------|------|
-| \`/bw brainstorm\` | 需求探索 |
-| \`/bw check\` | 通用检查 |
-| \`/bw parallel\` | 并行任务 |
-| \`/bw update-spec\` | 更新规范 |
-
-## 开发流程
-
-\`\`\`
-/bw start      -> 开始会话
-/bw before-dev -> 开发前读取规范
-[实现功能]
-/bw finish     -> 提交前检查
-git commit
-/bw record     -> 记录会话
-\`\`\`
-`;
-
-  const readmeFile = join(destCommandsDir, "README.md");
-  fs.writeFileSync(readmeFile, readmeContent, "utf-8");
-  console.log(chalk.gray(`  ✓ README.md`));
+  console.log(chalk.gray(`  ✓ ${count} 个命令 → .claude/commands/`));
 }
