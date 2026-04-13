@@ -17,7 +17,7 @@ interface InitOptions {
   force?: boolean;
 }
 
-// Trellis 命令映射到 bwflow (精简版)
+// Trellis 命令映射到 bwflow
 const COMMAND_MAP: Record<string, string> = {
   "trellis/start": "start",
   "trellis/before-dev": "before-dev",
@@ -40,27 +40,23 @@ export async function initCommand(options: InitOptions): Promise<void> {
   console.log(chalk.gray(`目标目录: ${cwd}`));
   console.log(chalk.gray(`模板目录: ${templatesDir}\n`));
 
-  // 检查是否已存在 bwflow
-  const bwflowDir = join(cwd, "bwflow");
+  // 检查是否已存在 .bwflow
+  const bwflowDir = join(cwd, ".bwflow");
   if (fs.existsSync(bwflowDir) && !options.force) {
-    console.log(chalk.yellow("⚠️  bwflow 目录已存在"));
+    console.log(chalk.yellow("⚠️  .bwflow 目录已存在"));
     console.log(chalk.gray("使用 --force 强制覆盖\n"));
     return;
   }
 
-  // 创建 bwflow 目录结构
+  // 创建 .bwflow 目录结构（与 Trellis 保持一致，增加 blueprint 层）
   const dirsToCreate = [
     bwflowDir,
     join(bwflowDir, "blueprint"),
-    join(bwflowDir, "blueprint", "src"),
     join(bwflowDir, "spec"),
     join(bwflowDir, "spec", "backend"),
     join(bwflowDir, "spec", "frontend"),
-    join(bwflowDir, "commands"),
-    join(bwflowDir, "hooks"),
     join(bwflowDir, "tasks"),
-    join(bwflowDir, "sessions"),
-    join(bwflowDir, "archive"),
+    join(bwflowDir, "workspace"),
     join(bwflowDir, "scripts"),
   ];
 
@@ -70,37 +66,6 @@ export async function initCommand(options: InitOptions): Promise<void> {
     const relPath = relative(cwd, dir);
     fs.ensureDirSync(dir);
     console.log(chalk.gray(`  ✓ ${relPath}/`));
-  }
-
-  // 复制 commands 模板（从 trellis/ 目录）
-  const srcCommandsDir = join(templatesDir, "commands", "trellis");
-  const destCommandsDir = join(bwflowDir, "commands");
-
-  console.log(chalk.cyan("\n📁 复制命令模板:\n"));
-
-  if (fs.existsSync(srcCommandsDir)) {
-    const cmdDirs = fs.readdirSync(srcCommandsDir);
-    for (const cmdDir of cmdDirs) {
-      const srcCmdDir = join(srcCommandsDir, cmdDir);
-      if (!fs.statSync(srcCmdDir).isDirectory()) continue;
-
-      // 只复制映射中存在的命令
-      const mappedName = COMMAND_MAP[`trellis/${cmdDir}`];
-      if (!mappedName) continue;
-
-      const destCmdDir = join(destCommandsDir, mappedName);
-      fs.ensureDirSync(destCmdDir);
-
-      const files = fs.readdirSync(srcCmdDir);
-      for (const file of files) {
-        if (file.endsWith(".md")) {
-          const srcFile = join(srcCmdDir, file);
-          const destFile = join(destCmdDir, file);
-          fs.copySync(srcFile, destFile, { overwrite: options.force || false });
-          console.log(chalk.gray(`  ✓ ${relative(cwd, destFile)}`));
-        }
-      }
-    }
   }
 
   // 复制 scripts 模板
@@ -115,11 +80,12 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
   // 复制 hooks 模板
   const srcHooksDir = join(templatesDir, "hooks");
-  const destHooksDir = join(bwflowDir, "hooks");
+  const destHooksDir = join(bwflowDir, "scripts", "hooks");
 
   console.log(chalk.cyan("\n📁 复制 Hooks 模板:\n"));
 
   if (fs.existsSync(srcHooksDir)) {
+    fs.ensureDirSync(destHooksDir);
     const hooks = fs.readdirSync(srcHooksDir);
     for (const hook of hooks) {
       if (hook.endsWith(".py")) {
@@ -201,34 +167,16 @@ export async function initCommand(options: InitOptions): Promise<void> {
 git commit
 /bw record     -> 记录会话
 \`\`\`
-
-## 目录结构
-
-\`\`\`
-bwflow/
-├── blueprint/      # 架构蓝图
-├── spec/          # 编码规范
-├── commands/      # 命令协议
-├── hooks/         # 生命周期钩子
-├── tasks/         # 任务目录
-├── sessions/      # 会话记录
-└── scripts/       # Python 脚本
-\`\`\`
 `;
   fs.writeFileSync(workflowPath, workflowContent, "utf-8");
   console.log(chalk.gray(`  ✓ ${relative(cwd, workflowPath)}`));
 
-  // 创建 .claude-shadow-context 目录
-  const shadowDir = join(cwd, ".claude-shadow-context");
-  fs.ensureDirSync(shadowDir);
-  console.log(chalk.gray(`  ✓ ${relative(cwd, shadowDir)}/`));
-
-  // 自动同步到 Claude Code
-  await syncToClaudeCode(cwd, bwflowDir);
+  // 同步命令到 Claude Code
+  await syncCommandsToClaudeCode(cwd, templatesDir);
 
   console.log(chalk.green("\n✅ bwflow 初始化完成!\n"));
   console.log(chalk.cyan("下一步:"));
-  console.log(chalk.gray("  1. 编辑 bwflow/blueprint/README.md 添加项目架构"));
+  console.log(chalk.gray("  1. 编辑 .bwflow/blueprint/README.md 添加项目架构"));
   console.log(chalk.gray("  2. 运行 /bw start 开始会话\n"));
 }
 
@@ -256,41 +204,49 @@ function copyDirectoryRecursive(src: string, dest: string, cwd: string): void {
 }
 
 /**
- * 同步到 Claude Code
+ * 同步命令到 Claude Code
  */
-async function syncToClaudeCode(cwd: string, bwflowDir: string): Promise<void> {
-  console.log(chalk.cyan("\n🔄 同步到 Claude Code...\n"));
+async function syncCommandsToClaudeCode(cwd: string, templatesDir: string): Promise<void> {
+  console.log(chalk.cyan("\n🔄 同步命令到 Claude Code...\n"));
 
-  // 1. 同步 commands 到 .claude/commands/bwflow/
-  const commandsDir = join(bwflowDir, "commands");
+  const srcCommandsDir = join(templatesDir, "commands", "trellis");
   const destCommandsDir = join(cwd, ".claude", "commands", "bwflow");
 
-  if (fs.existsSync(commandsDir)) {
-    fs.ensureDirSync(destCommandsDir);
-
-    const commandTypes = fs.readdirSync(commandsDir);
-    for (const cmdType of commandTypes) {
-      const srcCmdDir = join(commandsDir, cmdType);
-      const destCmdDir = join(destCommandsDir, cmdType);
-
-      if (fs.statSync(srcCmdDir).isDirectory()) {
-        fs.ensureDirSync(destCmdDir);
-
-        const files = fs.readdirSync(srcCmdDir);
-        for (const file of files) {
-          if (file.endsWith(".md")) {
-            const srcFile = join(srcCmdDir, file);
-            const destFile = join(destCmdDir, file);
-            fs.copySync(srcFile, destFile, { overwrite: true });
-          }
-        }
-      }
-    }
-
-    console.log(chalk.gray(`  ✓ commands → .claude/commands/bwflow/`));
+  if (!fs.existsSync(srcCommandsDir)) {
+    console.log(chalk.yellow("  ⚠️  未找到命令模板"));
+    return;
   }
 
-  // 2. 创建 README
+  fs.ensureDirSync(destCommandsDir);
+
+  const cmdDirs = fs.readdirSync(srcCommandsDir);
+  let count = 0;
+
+  for (const cmdDir of cmdDirs) {
+    const srcCmdDir = join(srcCommandsDir, cmdDir);
+    if (!fs.statSync(srcCmdDir).isDirectory()) continue;
+
+    // 只复制映射中存在的命令
+    const mappedName = COMMAND_MAP[`trellis/${cmdDir}`];
+    if (!mappedName) continue;
+
+    const destCmdDir = join(destCommandsDir, mappedName);
+    fs.ensureDirSync(destCmdDir);
+
+    const files = fs.readdirSync(srcCmdDir);
+    for (const file of files) {
+      if (file.endsWith(".md")) {
+        const srcFile = join(srcCmdDir, file);
+        const destFile = join(destCmdDir, file);
+        fs.copySync(srcFile, destFile, { overwrite: true });
+        count++;
+      }
+    }
+  }
+
+  console.log(chalk.gray(`  ✓ ${count} 个命令 → .claude/commands/bwflow/`));
+
+  // 创建 README
   const readmeContent = `# bwflow Commands
 
 Claude Code 集成 bwflow 协议命令。
@@ -325,7 +281,7 @@ git commit
 \`\`\`
 `;
 
-  const readmeFile = join(cwd, ".claude", "commands", "bwflow", "README.md");
+  const readmeFile = join(destCommandsDir, "README.md");
   fs.writeFileSync(readmeFile, readmeContent, "utf-8");
-  console.log(chalk.gray(`  ✓ README.md → .claude/commands/bwflow/README.md`));
+  console.log(chalk.gray(`  ✓ README.md`));
 }

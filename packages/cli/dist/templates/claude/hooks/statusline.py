@@ -49,7 +49,7 @@ def _normalize_task_ref(task_ref: str) -> str:
         normalized = normalized[2:]
 
     if normalized.startswith("tasks/"):
-        return f"bwflow/{normalized}"
+        return f"..bwflow/{normalized}"
 
     return normalized
 
@@ -59,7 +59,7 @@ def _resolve_task_dir(trellis_dir: Path, task_ref: str) -> Path:
     path_obj = Path(normalized)
     if path_obj.is_absolute():
         return path_obj
-    if normalized.startswith("bwflow/"):
+    if normalized.startswith("..bwflow/"):
         return trellis_dir.parent / path_obj
     return trellis_dir / "tasks" / path_obj
 

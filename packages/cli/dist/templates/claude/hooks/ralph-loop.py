@@ -13,7 +13,7 @@ Mechanism:
 - Blocks stopping until verification passes or all markers found
 - Has max iterations as safety limit
 
-State file: bwflow/.ralph-state.json
+State file: ..bwflow/.ralph-state.json
 - Tracks current iteration count per session
 - Resets when task changes
 """
@@ -44,8 +44,8 @@ if sys.platform == "win32":
 
 MAX_ITERATIONS = 5  # Safety limit to prevent infinite loops
 STATE_TIMEOUT_MINUTES = 30  # Reset state if older than this
-STATE_FILE = "bwflow/.ralph-state.json"
-WORKTREE_YAML = "bwflow/worktree.yaml"
+STATE_FILE = "..bwflow/.ralph-state.json"
+WORKTREE_YAML = "..bwflow/worktree.yaml"
 DIR_WORKFLOW = "bwflow"
 FILE_CURRENT_TASK = ".current-task"
 
@@ -78,7 +78,7 @@ def get_current_task(repo_root: str) -> str | None:
             while normalized.startswith("./"):
                 normalized = normalized[2:]
             if normalized.startswith("tasks/"):
-                normalized = f"bwflow/{normalized}"
+                normalized = f"..bwflow/{normalized}"
             return normalized
     except Exception:
         return None

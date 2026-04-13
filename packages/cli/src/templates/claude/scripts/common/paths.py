@@ -41,7 +41,7 @@ FILE_JOURNAL_PREFIX = "journal-"
 # =============================================================================
 
 def get_repo_root(start_path: Path | None = None) -> Path:
-    """Find the nearest directory containing bwflow/ folder.
+    """Find the nearest directory containing .bwflow/ folder.
 
     This handles nested git repos correctly (e.g., test project inside another repo).
 
@@ -49,7 +49,7 @@ def get_repo_root(start_path: Path | None = None) -> Path:
         start_path: Starting directory to search from. Defaults to current directory.
 
     Returns:
-        Path to repository root, or current directory if no bwflow/ found.
+        Path to repository root, or current directory if no .bwflow/ found.
     """
     current = (start_path or Path.cwd()).resolve()
 
@@ -58,7 +58,7 @@ def get_repo_root(start_path: Path | None = None) -> Path:
             return current
         current = current.parent
 
-    # Fallback to current directory if no bwflow/ found
+    # Fallback to current directory if no .bwflow/ found
     return Path.cwd().resolve()
 
 
@@ -225,7 +225,7 @@ def normalize_task_ref(task_ref: str) -> str:
     """Normalize a task ref for stable storage in .current-task.
 
     Stored refs should prefer repo-relative POSIX paths like
-    `bwflow/tasks/03-27-my-task`, even on Windows. Absolute paths are preserved
+    .bwflow/tasks/03-27-my-task`, even on Windows. Absolute paths are preserved
     unless they can later be converted back to repo-relative form by callers.
     """
     normalized = task_ref.strip()
@@ -392,8 +392,8 @@ def generate_task_date_prefix() -> str:
 def get_spec_dir(package: str | None = None, repo_root: Path | None = None) -> Path:
     """Get the spec directory path.
 
-    Single-repo: bwflow/spec
-    Monorepo with package: bwflow/spec/<package>
+    Single-repo: .bwflow/spec
+    Monorepo with package: .bwflow/spec/<package>
 
     Uses lazy import to avoid circular dependency with config.py.
     """

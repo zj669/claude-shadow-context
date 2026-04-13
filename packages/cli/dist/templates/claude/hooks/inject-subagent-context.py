@@ -11,7 +11,7 @@ Core Design Philosophy:
 
 Trigger: PreToolUse (before Task tool call)
 
-Context Source: bwflow/.current-task points to task directory
+Context Source: ..bwflow/.current-task points to task directory
 - implement.jsonl - Implement agent dedicated context
 - check.jsonl     - Check agent dedicated context
 - debug.jsonl     - Debug agent dedicated context
@@ -86,7 +86,7 @@ def find_repo_root(start_path: str) -> str | None:
 
 def get_current_task(repo_root: str) -> str | None:
     """
-    Read current task directory path from bwflow/.current-task
+    Read current task directory path from ..bwflow/.current-task
 
     Returns:
         Task directory relative path (relative to repo_root)
@@ -105,7 +105,7 @@ def get_current_task(repo_root: str) -> str | None:
             while normalized.startswith("./"):
                 normalized = normalized[2:]
             if normalized.startswith("tasks/"):
-                normalized = f"bwflow/{normalized}"
+                normalized = f"..bwflow/{normalized}"
             return normalized
     except Exception:
         return None

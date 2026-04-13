@@ -34,51 +34,6 @@ cd my-project
 bw init -u your-name --targets claudecode,cursor
 ```
 
-### 使用
-
-```bash
-/bwflow:init    # 初始化项目蓝图层
-/bwflow:explore # 探索项目上下文
-/bwflow:align   # 检查蓝图对齐
-```
-
-## 核心心智
-
-### Blueprint vs Spec
-
-bwflow 将项目知识分为两层：
-
-| 问题 | 答案来自 |
-|------|---------|
-| 这个模块负责什么？ | `bwflow/blueprint/` |
-| 代码应该怎么写？ | `bwflow/spec/` |
-| 遇到这个错误怎么办？ | `bwflow/evolved/` |
-| 这次修改是否偏离了原设计？ | `/bwflow:align` |
-
-### 目录结构
-
-```
-{project}/
-├── bwflow/
-│   ├── blueprint/       ← 理解层（蓝图，回答"为什么"）
-│   │   ├── README.md
-│   │   └── {module}/
-│   ├── commands/        ← 命令协议
-│   │   ├── init/
-│   │   ├── explore/
-│   │   ├── align/
-│   │   └── ...
-│   ├── agents/          ← 多角色 Agent 模板
-│   ├── hooks/           ← 生命周期钩子
-│   ├── scripts/         ← Python 执行脚本
-│   ├── tasks/           ← 任务目录
-│   ├── workspace/       ← 会话日志
-│   ├── spec/            ← 编码规范（回答"怎么写"）
-│   └── evolved/         ← 自我学习技能
-├── packages/
-│   └── cli/             ← NPM CLI 工具
-└── .claude/             ← Claude Code 配置（CLI 自动生成）
-```
 
 ## 设计原则
 
