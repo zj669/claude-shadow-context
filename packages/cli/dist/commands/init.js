@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", ".bwflow");
 // 工具模板目录（dist/commands/ -> dist/templates/）
 const TEMPLATES_DIR = join(__dirname, "..", "templates");
-const SUPPORTED_TYPES = ["claude", "cursor"];
+const SUPPORTED_TYPES = ["claude", "cursor", "kiro"];
 /**
  * 初始化 bwflow 结构
  */
@@ -65,10 +65,43 @@ function initToolIntegration(cwd, type) {
         return;
     }
     // 根据类型选择目标目录
-    const destDir = type === "cursor" ? join(cwd, ".cursor") : join(cwd, ".claude");
+    let destDir;
+    if (type === "cursor") {
+        destDir = join(cwd, ".cursor");
+    }
+    else if (type === "kiro") {
+        destDir = join(cwd, ".kiro");
+    }
+    else {
+        destDir = join(cwd, ".claude");
+    }
     copyDirectory(toolTemplateDir, destDir, cwd, {
         excludeDirs: ["__pycache__"],
     });
+    // Kiro 特殊处理
+    if (type === "kiro") {
+        // 1. 创建 common 软链接
+        const commonSrc = join(cwd, ".bwflow", "scripts", "common");
+        const commonDest = join(destDir, "scripts", "common");
+        if (fs.existsSync(commonSrc)) {
+            try {
+                fs.symlinkSync(commonSrc, commonDest, "dir");
+                console.log(chalk.gray(`  ✓ 创建软链接: scripts/common`));
+            }
+            catch (err) {
+                // Windows 回退到复制
+                fs.copySync(commonSrc, commonDest);
+                console.log(chalk.gray(`  ✓ 复制目录: scripts/common`));
+            }
+        }
+        // 2. 复制 spec 到 steering
+        const specSource = join(cwd, ".bwflow", "spec");
+        const steeringDest = join(destDir, "steering");
+        if (fs.existsSync(specSource)) {
+            fs.copySync(specSource, steeringDest);
+            console.log(chalk.gray(`  ✓ 复制规范文件到 Steering 系统`));
+        }
+    }
     // 设置脚本执行权限（仅 Unix 系统）
     if (process.platform !== "win32") {
         const hooksDir = join(destDir, "hooks");
@@ -81,6 +114,24 @@ function initToolIntegration(cwd, type) {
                 }
                 catch {
                     // 忽略权限设置失败
+                }
+            }
+        }
+        // Kiro: 设置 scripts 目录权限
+        if (type === "kiro") {
+            const scriptsDir = join(destDir, "scripts");
+            if (fs.existsSync(scriptsDir)) {
+                const files = fs.readdirSync(scriptsDir);
+                for (const file of files) {
+                    if (file.endsWith(".py")) {
+                        const filePath = join(scriptsDir, file);
+                        try {
+                            fs.chmodSync(filePath, 0o755);
+                        }
+                        catch {
+                            // 忽略权限设置失败
+                        }
+                    }
                 }
             }
         }
