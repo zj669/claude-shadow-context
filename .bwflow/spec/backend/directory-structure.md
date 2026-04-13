@@ -7,7 +7,7 @@
 ## Overview
 
 This project is a **Claude Code plugin** with hybrid architecture:
-- **Python** for bwflow workflow scripts and Claude hooks (`bwflow/scripts/`, `.claude/hooks/`)
+- **Python** for bwflow workflow scripts and Claude hooks (`.bwflow/scripts/`, `.claude/hooks/`)
 - **JavaScript (ESM)** for plugin logic (`scripts/`, `skills/`)
 
 ---
@@ -20,7 +20,7 @@ This project is a **Claude Code plugin** with hybrid architecture:
 │   ├── inject-subagent-context.py # PreToolUse: inject agent-specific context
 │   └── ralph-loop.py             # SubagentStop: quality gate loop
 │
-bwflow/scripts/          # Python bwflow workflow scripts
+.bwflow/scripts/          # Python bwflow workflow scripts
 │   ├── __init__.py               # Package init (UTF-8 encoding fix)
 │   ├── common/                   # Shared modules
 │   │   ├── __init__.py           # UTF-8 stdin/stdout/stderr fix

@@ -22,7 +22,7 @@ from pathlib import Path
 # =============================================================================
 
 # Directory names
-DIR_WORKFLOW = "bwflow"
+DIR_WORKFLOW = ".bwflow"
 DIR_BLUEPRINT = "blueprint"
 DIR_WORKSPACE = "workspace"
 DIR_TASKS = "tasks"

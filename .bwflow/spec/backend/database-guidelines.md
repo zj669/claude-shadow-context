@@ -14,12 +14,12 @@
 
 | Data Type | Storage | Format |
 |-----------|---------|--------|
-| Task state | `bwflow/tasks/{task-id}/task.json` | JSON |
-| Agent context | `bwflow/tasks/{task-id}/*.jsonl` | JSON Lines |
-| Session memory | `bwflow/workspace/{developer}/journal-N.md` | Markdown |
+| Task state | `.bwflow/tasks/{task-id}/task.json` | JSON |
+| Agent context | `.bwflow/tasks/{task-id}/*.jsonl` | JSON Lines |
+| Session memory | `.bwflow/workspace/{developer}/journal-N.md` | Markdown |
 | Blueprint layer | `.blueprint/` | Markdown |
-| Developer identity | `bwflow/.developer` | Plain text |
-| Current task | `bwflow/.current-task` | Plain text |
+| Developer identity | `.bwflow/.developer` | Plain text |
+| Current task | `.bwflow/.current-task` | Plain text |
 
 ---
 

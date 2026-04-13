@@ -29,8 +29,8 @@ python3 ./bwflow/scripts/init_developer.py <your-name>
 ```
 
 This creates:
-- `bwflow/.developer` - Your identity file (gitignored, not committed)
-- `bwflow/workspace/<your-name>/` - Your personal workspace directory
+- `.bwflow/.developer` - Your identity file (gitignored, not committed)
+- `.bwflow/workspace/<your-name>/` - Your personal workspace directory
 
 ### Step 1: Understand Current Context
 
@@ -45,10 +45,10 @@ python3 ./bwflow/scripts/get_context.py
 
 ```bash
 # Read frontend guidelines index (if applicable)
-cat bwflow/spec/frontend/index.md
+cat .bwflow/spec/frontend/index.md
 
 # Read backend guidelines index (if applicable)
-cat bwflow/spec/backend/index.md
+cat .bwflow/spec/backend/index.md
 ```
 
 ### Step 3: Before Coding - Read Specific Guidelines
@@ -57,22 +57,22 @@ Based on your task, read the **detailed** guidelines:
 
 **Frontend Task**:
 ```bash
-cat bwflow/spec/frontend/component-guidelines.md
-cat bwflow/spec/frontend/type-safety.md
+cat .bwflow/spec/frontend/component-guidelines.md
+cat .bwflow/spec/frontend/type-safety.md
 ```
 
 **Backend Task**:
 ```bash
-cat bwflow/spec/backend/database-guidelines.md
-cat bwflow/spec/backend/error-handling.md
+cat .bwflow/spec/backend/database-guidelines.md
+cat .bwflow/spec/backend/error-handling.md
 ```
 
 ---
 
 ## Core Principles
 
-1. **Blueprint First** — Read `bwflow/blueprint/` before diving into code
-2. **Follow Standards** — **MUST read** `bwflow/spec/` guidelines before coding
+1. **Blueprint First** — Read `.bwflow/blueprint/` before diving into code
+2. **Follow Standards** — **MUST read** `.bwflow/spec/` guidelines before coding
 3. **Minimum Context** — Blueprints are sufficient, don't expand to implementation details
 4. **End Alignment** — Check if blueprints are still trustworthy at task end
 
@@ -91,9 +91,9 @@ python3 ./bwflow/scripts/get_context.py
 **MUST read** guidelines before writing code:
 
 ```bash
-cat bwflow/spec/frontend/index.md   # Frontend guidelines
-cat bwflow/spec/backend/index.md    # Backend guidelines
-cat bwflow/spec/guides/index.md     # Thinking guides
+cat .bwflow/spec/frontend/index.md   # Frontend guidelines
+cat .bwflow/spec/backend/index.md    # Backend guidelines
+cat .bwflow/spec/guides/index.md     # Thinking guides
 ```
 
 ### Step 3: Select Task to Develop

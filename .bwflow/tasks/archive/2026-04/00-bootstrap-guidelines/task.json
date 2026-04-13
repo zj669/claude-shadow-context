@@ -27,8 +27,8 @@
   "children": [],
   "parent": null,
   "relatedFiles": [
-    "bwflow/spec/backend/",
-    "bwflow/spec/frontend/"
+    ".bwflow/spec/backend/",
+    ".bwflow/spec/frontend/"
   ],
   "notes": "First-time setup task created by trellis init (fullstack project)",
   "meta": {}

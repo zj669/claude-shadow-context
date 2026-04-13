@@ -13,9 +13,7 @@ Mechanism:
 - Blocks stopping until verification passes or all markers found
 - Has max iterations as safety limit
 
-State file: ..bwflow/.ralph-state.json
-- Tracks current iteration count per session
-- Resets when task changes
+State file: .bwflow/.ralph-state.json
 """
 
 # IMPORTANT: Suppress all warnings FIRST
@@ -30,26 +28,23 @@ from datetime import datetime
 from pathlib import Path
 
 # IMPORTANT: Force stdout to use UTF-8 on Windows
-# This fixes UnicodeEncodeError when outputting non-ASCII characters
 if sys.platform == "win32":
     import io as _io
     if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     elif hasattr(sys.stdout, "detach"):
-        sys.stdout = _io.TextIOWrapper(sys.stdout.detach(), encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        sys.stdout = _io.TextIOWrapper(sys.stdout.detach(), encoding="utf-8", errors="replace")
 
 # =============================================================================
 # Configuration
 # =============================================================================
 
-MAX_ITERATIONS = 5  # Safety limit to prevent infinite loops
-STATE_TIMEOUT_MINUTES = 30  # Reset state if older than this
-STATE_FILE = "..bwflow/.ralph-state.json"
-WORKTREE_YAML = "..bwflow/worktree.yaml"
-DIR_WORKFLOW = "bwflow"
+MAX_ITERATIONS = 5
+STATE_TIMEOUT_MINUTES = 30
+STATE_FILE = ".bwflow/.ralph-state.json"
+WORKTREE_YAML = ".bwflow/worktree.yaml"
+DIR_WORKFLOW = ".bwflow"
 FILE_CURRENT_TASK = ".current-task"
-
-# Only control loop for check agent
 TARGET_AGENT = "check"
 
 
@@ -65,42 +60,32 @@ def find_repo_root(start_path: str) -> str | None:
 
 def get_current_task(repo_root: str) -> str | None:
     """Read current task directory path"""
-    current_task_file = os.path.join(repo_root, DIR_WORKFLOW, FILE_CURRENT_TASK)
-    if not os.path.exists(current_task_file):
+    current_task_file = Path(repo_root) / DIR_WORKFLOW / FILE_CURRENT_TASK
+    if not current_task_file.is_file():
         return None
 
     try:
-        with open(current_task_file, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-            if not content:
-                return None
-            normalized = content.replace("\\", "/")
-            while normalized.startswith("./"):
-                normalized = normalized[2:]
-            if normalized.startswith("tasks/"):
-                normalized = f"..bwflow/{normalized}"
-            return normalized
+        content = current_task_file.read_text(encoding="utf-8").strip()
+        if not content:
+            return None
+        normalized = content.replace("\\", "/")
+        while normalized.startswith("./"):
+            normalized = normalized[2:]
+        if normalized.startswith("tasks/"):
+            normalized = f".bwflow/{normalized}"
+        return normalized
     except Exception:
         return None
 
 
 def get_verify_commands(repo_root: str) -> list[str]:
-    """
-    Read verify commands from worktree.yaml.
-
-    Returns list of commands to run, or empty list if not configured.
-    Uses simple YAML parsing without external dependencies.
-    """
-    yaml_path = os.path.join(repo_root, WORKTREE_YAML)
-    if not os.path.exists(yaml_path):
+    """Read verify commands from worktree.yaml"""
+    yaml_path = Path(repo_root) / WORKTREE_YAML
+    if not yaml_path.is_file():
         return []
 
     try:
-        with open(yaml_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        # Simple YAML parsing for verify section
-        # Look for "verify:" followed by list items
+        content = yaml_path.read_text(encoding="utf-8")
         lines = content.split("\n")
         in_verify_section = False
         commands = []
@@ -108,27 +93,17 @@ def get_verify_commands(repo_root: str) -> list[str]:
         for line in lines:
             stripped = line.strip()
 
-            # Check for section start
             if stripped.startswith("verify:"):
                 in_verify_section = True
                 continue
 
-            # Check for new section (not indented, ends with :)
-            if (
-                not line.startswith(" ")
-                and not line.startswith("\t")
-                and stripped.endswith(":")
-                and stripped != ""
-            ):
+            if not line.startswith(" ") and not line.startswith("\t") and stripped.endswith(":") and stripped != "":
                 in_verify_section = False
                 continue
 
-            # If in verify section, look for list items
             if in_verify_section:
-                # Skip comments and empty lines
                 if stripped.startswith("#") or stripped == "":
                     continue
-                # Parse list item (- command)
                 if stripped.startswith("- "):
                     cmd = stripped[2:].strip()
                     if cmd:
@@ -140,25 +115,23 @@ def get_verify_commands(repo_root: str) -> list[str]:
 
 
 def run_verify_commands(repo_root: str, commands: list[str]) -> tuple[bool, str]:
-    """
-    Run verify commands and return (success, message).
-
-    All commands must pass for success.
-    """
+    """Run verify commands and return (success, message)"""
     for cmd in commands:
         try:
+            env = os.environ.copy()
+            env["PYTHONIOENCODING"] = "utf-8"
             result = subprocess.run(
                 cmd,
                 shell=True,
                 cwd=repo_root,
                 capture_output=True,
-                timeout=120,  # 2 minute timeout per command
+                timeout=120,
+                env=env,
             )
             if result.returncode != 0:
-                stderr = result.stderr.decode("utf-8", errors="replace")
-                stdout = result.stdout.decode("utf-8", errors="replace")
+                stderr = result.stderr.decode("utf-8", errors="replace") if isinstance(result.stderr, bytes) else result.stderr
+                stdout = result.stdout.decode("utf-8", errors="replace") if isinstance(result.stdout, bytes) else result.stdout
                 error_output = stderr or stdout
-                # Truncate long output
                 if len(error_output) > 500:
                     error_output = error_output[:500] + "..."
                 return False, f"Command failed: {cmd}\n{error_output}"
@@ -171,39 +144,30 @@ def run_verify_commands(repo_root: str, commands: list[str]) -> tuple[bool, str]
 
 
 def get_completion_markers(repo_root: str, task_dir: str) -> list[str]:
-    """
-    Read check.jsonl and generate completion markers from reasons.
-
-    Each entry's "reason" field becomes {REASON}_FINISH marker.
-    Example: {"file": "...", "reason": "TypeCheck"} -> "TYPECHECK_FINISH"
-    """
-    check_jsonl_path = os.path.join(repo_root, task_dir, "check.jsonl")
+    """Read check.jsonl and generate completion markers from reasons"""
+    check_jsonl_path = Path(repo_root) / DIR_WORKFLOW / "tasks" / task_dir / "check.jsonl"
     markers = []
 
-    if not os.path.exists(check_jsonl_path):
-        # Fallback: if no check.jsonl, use default marker
+    if not check_jsonl_path.is_file():
         return ["ALL_CHECKS_FINISH"]
 
     try:
-        with open(check_jsonl_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    item = json.loads(line)
-                    reason = item.get("reason", "")
-                    if reason:
-                        # Convert to uppercase and add _FINISH suffix
-                        marker = f"{reason.upper().replace(' ', '_')}_FINISH"
-                        if marker not in markers:
-                            markers.append(marker)
-                except json.JSONDecodeError:
-                    continue
+        for line in check_jsonl_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                item = json.loads(line)
+                reason = item.get("reason", "")
+                if reason:
+                    marker = f"{reason.upper().replace(' ', '_')}_FINISH"
+                    if marker not in markers:
+                        markers.append(marker)
+            except json.JSONDecodeError:
+                continue
     except Exception:
         pass
 
-    # If no markers found, use default
     if not markers:
         markers = ["ALL_CHECKS_FINISH"]
 
@@ -212,87 +176,67 @@ def get_completion_markers(repo_root: str, task_dir: str) -> list[str]:
 
 def load_state(repo_root: str) -> dict:
     """Load Ralph Loop state from file"""
-    state_path = os.path.join(repo_root, STATE_FILE)
-    if not os.path.exists(state_path):
+    state_path = Path(repo_root) / STATE_FILE
+    if not state_path.is_file():
         return {"task": None, "iteration": 0, "started_at": None}
 
     try:
-        with open(state_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        return json.loads(state_path.read_text(encoding="utf-8"))
     except Exception:
         return {"task": None, "iteration": 0, "started_at": None}
 
 
 def save_state(repo_root: str, state: dict) -> None:
     """Save Ralph Loop state to file"""
-    state_path = os.path.join(repo_root, STATE_FILE)
+    state_path = Path(repo_root) / STATE_FILE
     try:
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(state_path), exist_ok=True)
-        with open(state_path, "w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2, ensure_ascii=False)
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        state_path.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
         pass
-
-
-def check_completion(agent_output: str, markers: list[str]) -> tuple[bool, list[str]]:
-    """
-    Check if all completion markers are present in agent output.
-
-    Returns:
-        (all_complete, missing_markers)
-    """
-    missing = []
-    for marker in markers:
-        if marker not in agent_output:
-            missing.append(marker)
-
-    return len(missing) == 0, missing
 
 
 def main():
     try:
         input_data = json.load(sys.stdin)
     except json.JSONDecodeError:
-        # If can't parse input, allow stop
         sys.exit(0)
 
-    # Get event info
     hook_event = input_data.get("hook_event_name", "")
 
-    # Only handle SubagentStop event
     if hook_event != "SubagentStop":
         sys.exit(0)
 
     # Get subagent info
-    # Field names per Claude Code SubagentStop event schema:
-    #   agent_type, last_assistant_message, agent_id, agent_transcript_path, cwd
-    # The event does NOT carry a `prompt` field, so finish-phase detection
-    # based on a `[finish]` marker in the user prompt is no longer possible
-    # here; finish-phase skip logic should be reintroduced via task.json
-    # state (e.g. current_phase) in a follow-up.
-    agent_type = input_data.get("agent_type", "")
-    last_assistant_message = input_data.get("last_assistant_message", "")
-    cwd = input_data.get("cwd", os.getcwd())
+    agent_type = (
+        input_data.get("agent_type", "")
+        or input_data.get("subagent_type", "")
+        or input_data.get("subagent", "")
+        or input_data.get("name", "")
+    )
 
-    # Only control check agent
+    last_assistant_message = (
+        input_data.get("last_assistant_message", "")
+        or input_data.get("message", "")
+        or input_data.get("result", "")
+        or input_data.get("output", "")
+    )
+
+    cwd = input_data.get("cwd") or os.getcwd()
+
     if agent_type != TARGET_AGENT:
         sys.exit(0)
 
-    # Find repo root
     repo_root = find_repo_root(cwd)
     if not repo_root:
         sys.exit(0)
 
-    # Get current task
     task_dir = get_current_task(repo_root)
     if not task_dir:
         sys.exit(0)
 
-    # Load state
     state = load_state(repo_root)
 
-    # Reset state if task changed or state is too old
     should_reset = False
     if state.get("task") != task_dir:
         should_reset = True
@@ -311,16 +255,12 @@ def main():
             "started_at": datetime.now().isoformat(),
         }
 
-    # Increment iteration
     state["iteration"] = state.get("iteration", 0) + 1
     current_iteration = state["iteration"]
 
-    # Save state
     save_state(repo_root, state)
 
-    # Safety check: max iterations
     if current_iteration >= MAX_ITERATIONS:
-        # Allow stop, reset state for next run
         state["iteration"] = 0
         save_state(repo_root, state)
         output = {
@@ -330,15 +270,12 @@ def main():
         print(json.dumps(output, ensure_ascii=False))
         sys.exit(0)
 
-    # Check if verify commands are configured
     verify_commands = get_verify_commands(repo_root)
 
     if verify_commands:
-        # Use programmatic verification
         passed, message = run_verify_commands(repo_root, verify_commands)
 
         if passed:
-            # All verify commands passed, allow stop
             state["iteration"] = 0
             save_state(repo_root, state)
             output = {
@@ -348,7 +285,6 @@ def main():
             print(json.dumps(output, ensure_ascii=False))
             sys.exit(0)
         else:
-            # Verification failed, block stop
             output = {
                 "decision": "block",
                 "reason": f"Iteration {current_iteration}/{MAX_ITERATIONS}. Verification failed:\n{message}\n\nPlease fix the issues and try again.",
@@ -356,37 +292,26 @@ def main():
             print(json.dumps(output, ensure_ascii=False))
             sys.exit(0)
     else:
-        # No verify commands, fall back to completion markers
         markers = get_completion_markers(repo_root, task_dir)
-        all_complete, missing = check_completion(last_assistant_message, markers)
 
-        if all_complete:
-            # All checks complete, allow stop
+        missing = []
+        for marker in markers:
+            if marker not in last_assistant_message:
+                missing.append(marker)
+
+        if not missing:
             state["iteration"] = 0
             save_state(repo_root, state)
             output = {
                 "decision": "allow",
-                "reason": "All completion markers found. Check phase complete.",
+                "reason": f"All completion markers found: {', '.join(markers)}",
             }
             print(json.dumps(output, ensure_ascii=False))
             sys.exit(0)
         else:
-            # Missing markers, block stop and continue
             output = {
                 "decision": "block",
-                "reason": f"""Iteration {current_iteration}/{MAX_ITERATIONS}. Missing completion markers: {", ".join(missing)}.
-
-IMPORTANT: You must ACTUALLY run the checks, not just output the markers.
-- Did you run lint? What was the output?
-- Did you run typecheck? What was the output?
-- Did they actually pass with zero errors?
-
-Only output a marker (e.g., LINT_FINISH) AFTER:
-1. You have executed the corresponding command
-2. The command completed with zero errors
-3. You have shown the command output in your response
-
-Do NOT output markers just to escape the loop. The loop exists to ensure quality.""",
+                "reason": f"Iteration {current_iteration}/{MAX_ITERATIONS}. Missing completion markers: {', '.join(missing)}\n\nPlease ensure all checks pass and output the completion markers.",
             }
             print(json.dumps(output, ensure_ascii=False))
             sys.exit(0)

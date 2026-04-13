@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", ".bwflow");
 // 工具模板目录（dist/commands/ -> dist/templates/）
 const TEMPLATES_DIR = join(__dirname, "..", "templates");
-const SUPPORTED_TYPES = ["claude"];
+const SUPPORTED_TYPES = ["claude", "cursor"];
 /**
  * 初始化 bwflow 结构
  */
@@ -30,7 +30,7 @@ export async function initCommand(options) {
     console.log(chalk.gray(`初始化类型: ${initType}\n`));
     // 1. 复制 bwflow 核心到 .bwflow/
     initBwflow(cwd);
-    // 2. 复制工具模板到 .claude/
+    // 2. 复制工具模板到对应目录
     initToolIntegration(cwd, initType);
     console.log(chalk.green("\n✅ bwflow 初始化完成!\n"));
     console.log(chalk.cyan("下一步:"));
@@ -55,7 +55,7 @@ function initBwflow(cwd) {
     });
 }
 /**
- * 复制工具模板到 .claude/
+ * 复制工具模板到对应目录
  */
 function initToolIntegration(cwd, type) {
     console.log(chalk.cyan(`\n🔧 初始化 ${type} 集成...\n`));
@@ -64,10 +64,27 @@ function initToolIntegration(cwd, type) {
         console.log(chalk.yellow(`⚠️  未找到 ${type} 模板目录`));
         return;
     }
-    const destDir = join(cwd, ".claude");
+    // 根据类型选择目标目录
+    const destDir = type === "cursor" ? join(cwd, ".cursor") : join(cwd, ".claude");
     copyDirectory(toolTemplateDir, destDir, cwd, {
         excludeDirs: ["__pycache__"],
     });
+    // 设置脚本执行权限（仅 Unix 系统）
+    if (process.platform !== "win32") {
+        const hooksDir = join(destDir, "hooks");
+        if (fs.existsSync(hooksDir)) {
+            const files = fs.readdirSync(hooksDir);
+            for (const file of files) {
+                const filePath = join(hooksDir, file);
+                try {
+                    fs.chmodSync(filePath, 0o755);
+                }
+                catch {
+                    // 忽略权限设置失败
+                }
+            }
+        }
+    }
 }
 /**
  * 递归复制目录

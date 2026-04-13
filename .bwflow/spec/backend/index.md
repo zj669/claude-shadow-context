@@ -8,7 +8,7 @@
 
 This directory contains guidelines for backend (script) development in this project. Since this is a **Claude Code plugin** rather than a traditional backend service, "backend" here refers to:
 
-- **Python scripts**: bwflow workflow scripts (`bwflow/scripts/`) and Claude hooks (`.claude/hooks/`)
+- **Python scripts**: bwflow workflow scripts (`.bwflow/scripts/`) and Claude hooks (`.claude/hooks/`)
 - **JavaScript modules**: Plugin scripts (`scripts/`)
 
 ---

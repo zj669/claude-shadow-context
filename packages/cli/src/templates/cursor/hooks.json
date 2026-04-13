@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "python3 .cursor/hooks/session-start.py",
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "python3 .cursor/hooks/inject-subagent-context.py",
+        "timeout": 30,
+        "matcher": "Task"
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "python3 .cursor/hooks/ralph-loop.py",
+        "timeout": 10,
+        "matcher": "check"
+      }
+    ]
+  }
+}

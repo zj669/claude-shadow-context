@@ -16,13 +16,12 @@ from io import StringIO
 from pathlib import Path
 
 # IMPORTANT: Force stdout to use UTF-8 on Windows
-# This fixes UnicodeEncodeError when outputting non-ASCII characters
 if sys.platform == "win32":
     import io as _io
     if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     elif hasattr(sys.stdout, "detach"):
-        sys.stdout = _io.TextIOWrapper(sys.stdout.detach(), encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        sys.stdout = _io.TextIOWrapper(sys.stdout.detach(), encoding="utf-8", errors="replace")
 
 
 def should_skip_injection() -> bool:
@@ -42,7 +41,6 @@ def read_file(path: Path, fallback: str = "") -> str:
 def run_script(script_path: Path) -> str:
     try:
         if script_path.suffix == ".py":
-            # Add PYTHONIOENCODING to force UTF-8 in subprocess
             env = os.environ.copy()
             env["PYTHONIOENCODING"] = "utf-8"
             cmd = [sys.executable, "-W", "ignore", str(script_path)]
@@ -79,7 +77,7 @@ def _normalize_task_ref(task_ref: str) -> str:
         normalized = normalized[2:]
 
     if normalized.startswith("tasks/"):
-        return f"..bwflow/{normalized}"
+        return f".bwflow/{normalized}"
 
     return normalized
 
@@ -89,7 +87,7 @@ def _resolve_task_dir(trellis_dir: Path, task_ref: str) -> Path:
     path_obj = Path(normalized)
     if path_obj.is_absolute():
         return path_obj
-    if normalized.startswith("..bwflow/"):
+    if normalized.startswith(".bwflow/"):
         return trellis_dir.parent / path_obj
     return trellis_dir / "tasks" / path_obj
 
@@ -104,12 +102,10 @@ def _get_task_status(trellis_dir: Path) -> str:
     if not task_ref:
         return "Status: NO ACTIVE TASK\nNext: Describe what you want to work on"
 
-    # Resolve task directory
     task_dir = _resolve_task_dir(trellis_dir, task_ref)
     if not task_dir.is_dir():
-        return f"Status: STALE POINTER\nTask: {task_ref}\nNext: Task directory not found. Run: python3 ..bwflow/scripts/task.py finish"
+        return f"Status: STALE POINTER\nTask: {task_ref}\nNext: Task directory not found. Run: python3 .bwflow/scripts/task.py finish"
 
-    # Read task.json
     task_json_path = task_dir / "task.json"
     task_data = {}
     if task_json_path.is_file():
@@ -122,9 +118,8 @@ def _get_task_status(trellis_dir: Path) -> str:
     task_status = task_data.get("status", "unknown")
 
     if task_status == "completed":
-        return f"Status: COMPLETED\nTask: {task_title}\nNext: Archive with `python3 ..bwflow/scripts/task.py archive {task_dir.name}` or start a new task"
+        return f"Status: COMPLETED\nTask: {task_title}\nNext: Archive with `python3 .bwflow/scripts/task.py archive {task_dir.name}` or start a new task"
 
-    # Check if context is configured (jsonl files exist and non-empty)
     has_context = False
     for jsonl_name in ("implement.jsonl", "check.jsonl", "spec.jsonl"):
         jsonl_path = task_dir / jsonl_name
@@ -144,25 +139,20 @@ def _get_task_status(trellis_dir: Path) -> str:
 
 
 def _load_trellis_config(trellis_dir: Path) -> tuple:
-    """Load Trellis config for session-start decisions.
-
-    Returns:
-        (is_mono, packages_dict, spec_scope, task_pkg, default_pkg)
-    """
+    """Load Trellis config for session-start decisions."""
     scripts_dir = trellis_dir / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
 
     try:
-        from common.config import get_default_package, get_packages, get_spec_scope, is_monorepo  # type: ignore[import-not-found]
-        from common.paths import get_current_task  # type: ignore[import-not-found]
+        from common.config import get_default_package, get_packages, get_spec_scope, is_monorepo
+        from common.paths import get_current_task
 
         repo_root = trellis_dir.parent
         is_mono = is_monorepo(repo_root)
         packages = get_packages(repo_root) or {}
         scope = get_spec_scope(repo_root)
 
-        # Get active task's package
         task_pkg = None
         current = get_current_task(repo_root)
         if current:
@@ -184,10 +174,7 @@ def _load_trellis_config(trellis_dir: Path) -> tuple:
 
 
 def _check_legacy_spec(trellis_dir: Path, is_mono: bool, packages: dict) -> str | None:
-    """Check for legacy spec directory structure in monorepo.
-
-    Returns warning message if legacy structure detected, None otherwise.
-    """
+    """Check for legacy spec directory structure in monorepo."""
     if not is_mono or not packages:
         return None
 
@@ -195,7 +182,6 @@ def _check_legacy_spec(trellis_dir: Path, is_mono: bool, packages: dict) -> str 
     if not spec_dir.is_dir():
         return None
 
-    # Check for legacy flat spec dirs (spec/backend/, spec/frontend/ with index.md)
     has_legacy = False
     for legacy_name in ("backend", "frontend"):
         legacy_dir = spec_dir / legacy_name
@@ -206,14 +192,13 @@ def _check_legacy_spec(trellis_dir: Path, is_mono: bool, packages: dict) -> str 
     if not has_legacy:
         return None
 
-    # Check which packages are missing spec/<pkg>/ directory
     missing = [
         name for name in sorted(packages.keys())
         if not (spec_dir / name).is_dir()
     ]
 
     if not missing:
-        return None  # All packages have spec dirs
+        return None
 
     if len(missing) == len(packages):
         return (
@@ -236,23 +221,19 @@ def _resolve_spec_scope(
     task_pkg: str | None,
     default_pkg: str | None,
 ) -> set | None:
-    """Resolve which packages should have their specs injected.
-
-    Returns:
-        Set of package names to include, or None for full scan.
-    """
+    """Resolve which packages should have their specs injected."""
     if not is_mono or not packages:
-        return None  # Single-repo: full scan
+        return None
 
     if scope is None:
-        return None  # No scope configured: full scan
+        return None
 
     if isinstance(scope, str) and scope == "active_task":
         if task_pkg and task_pkg in packages:
             return {task_pkg}
         if default_pkg and default_pkg in packages:
             return {default_pkg}
-        return None  # Fallback to full scan
+        return None
 
     if isinstance(scope, list):
         valid = set()
@@ -260,32 +241,21 @@ def _resolve_spec_scope(
             if entry in packages:
                 valid.add(entry)
             else:
-                print(
-                    f"Warning: spec_scope contains unknown package: {entry}, ignoring",
-                    file=sys.stderr,
-                )
+                print(f"Warning: spec_scope contains unknown package: {entry}, ignoring", file=sys.stderr)
 
         if valid:
-            # Warn if active task is out of scope
             if task_pkg and task_pkg not in valid:
-                print(
-                    f"Warning: active task package '{task_pkg}' is out of configured spec_scope",
-                    file=sys.stderr,
-                )
+                print(f"Warning: active task package '{task_pkg}' is out of configured spec_scope", file=sys.stderr)
             return valid
 
-        # All entries invalid: fallback chain
-        print(
-            "Warning: all spec_scope entries invalid, falling back to task/default/full",
-            file=sys.stderr,
-        )
+        print("Warning: all spec_scope entries invalid, falling back to task/default/full", file=sys.stderr)
         if task_pkg and task_pkg in packages:
             return {task_pkg}
         if default_pkg and default_pkg in packages:
             return {default_pkg}
-        return None  # Full scan
+        return None
 
-    return None  # Unknown scope type: full scan
+    return None
 
 
 def main():
@@ -293,23 +263,20 @@ def main():
         sys.exit(0)
 
     project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", ".")).resolve()
-    trellis_dir = project_dir / "bwflow"
-    claude_dir = project_dir / ".claude"
+    trellis_dir = project_dir / ".bwflow"
 
-    # Load config for scope filtering and legacy detection
     is_mono, packages, scope_config, task_pkg, default_pkg = _load_trellis_config(trellis_dir)
     allowed_pkgs = _resolve_spec_scope(is_mono, packages, scope_config, task_pkg, default_pkg)
 
     output = StringIO()
 
     output.write("""<session-context>
-You are starting a new session in a Trellis-managed project.
+You are starting a new session in a bwflow-managed project.
 Read and follow all instructions below carefully.
 </session-context>
 
 """)
 
-    # Legacy migration warning
     legacy_warning = _check_legacy_spec(trellis_dir, is_mono, packages)
     if legacy_warning:
         output.write(f"<migration-warning>\n{legacy_warning}\n</migration-warning>\n\n")
@@ -325,8 +292,7 @@ Read and follow all instructions below carefully.
     output.write("\n</workflow>\n\n")
 
     output.write("<guidelines>\n")
-    output.write("**Note**: The guidelines below are index files — they list available guideline documents and their locations.\n")
-    output.write("During actual development, you MUST read the specific guideline files listed in each index's Pre-Development Checklist.\n\n")
+    output.write("**Note**: The guidelines below are index files — they list available guideline documents.\n\n")
 
     spec_dir = trellis_dir / "spec"
     if spec_dir.is_dir():
@@ -334,7 +300,6 @@ Read and follow all instructions below carefully.
             if not sub.is_dir() or sub.name.startswith("."):
                 continue
 
-            # Always include guides/ regardless of scope
             if sub.name == "guides":
                 index_file = sub / "index.md"
                 if index_file.is_file():
@@ -345,52 +310,13 @@ Read and follow all instructions below carefully.
 
             index_file = sub / "index.md"
             if index_file.is_file():
-                # Flat spec dir (single-repo layer like spec/backend/)
                 output.write(f"## {sub.name}\n")
                 output.write(read_file(index_file))
                 output.write("\n\n")
-            else:
-                # Nested package dirs (monorepo: spec/<pkg>/<layer>/index.md)
-                # Apply scope filter
-                if allowed_pkgs is not None and sub.name not in allowed_pkgs:
-                    continue
-                for nested in sorted(sub.iterdir()):
-                    if not nested.is_dir():
-                        continue
-                    nested_index = nested / "index.md"
-                    if nested_index.is_file():
-                        output.write(f"## {sub.name}/{nested.name}\n")
-                        output.write(read_file(nested_index))
-                        output.write("\n\n")
 
-    output.write("</guidelines>\n\n")
+    output.write("</guidelines>\n")
 
-    output.write("<instructions>\n")
-    start_md = read_file(
-        claude_dir / "commands" / "trellis" / "start.md", "No start.md found"
-    )
-    output.write(start_md)
-    output.write("\n</instructions>\n\n")
-
-    # Check task status and inject structured tag
-    task_status = _get_task_status(trellis_dir)
-    output.write(f"<task-status>\n{task_status}\n</task-status>\n\n")
-
-    output.write("""<ready>
-Context loaded. Steps 1-3 (workflow, context, guidelines) are already injected above — do NOT re-read them.
-Start from Step 4. Wait for user's first message, then follow <instructions> to handle their request.
-If there is an active task, ask whether to continue it.
-</ready>""")
-
-    result = {
-        "hookSpecificOutput": {
-            "hookEventName": "SessionStart",
-            "additionalContext": output.getvalue(),
-        }
-    }
-
-    # Output JSON - stdout is already configured for UTF-8
-    print(json.dumps(result, ensure_ascii=False), flush=True)
+    print(json.dumps({"message": output.getvalue()}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

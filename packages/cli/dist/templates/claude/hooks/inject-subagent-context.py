@@ -11,7 +11,7 @@ Core Design Philosophy:
 
 Trigger: PreToolUse (before Task tool call)
 
-Context Source: ..bwflow/.current-task points to task directory
+Context Source: .bwflow/.current-task points to task directory
 - implement.jsonl - Implement agent dedicated context
 - check.jsonl     - Check agent dedicated context
 - debug.jsonl     - Debug agent dedicated context
@@ -44,7 +44,7 @@ if sys.platform == "win32":
 # Path Constants (change here to rename directories)
 # =============================================================================
 
-DIR_WORKFLOW = "bwflow"
+DIR_WORKFLOW = ".bwflow"
 DIR_WORKSPACE = "workspace"
 DIR_TASKS = "tasks"
 DIR_SPEC = "spec"
@@ -86,7 +86,7 @@ def find_repo_root(start_path: str) -> str | None:
 
 def get_current_task(repo_root: str) -> str | None:
     """
-    Read current task directory path from ..bwflow/.current-task
+    Read current task directory path from .bwflow/.current-task
 
     Returns:
         Task directory relative path (relative to repo_root)
@@ -105,7 +105,7 @@ def get_current_task(repo_root: str) -> str | None:
             while normalized.startswith("./"):
                 normalized = normalized[2:]
             if normalized.startswith("tasks/"):
-                normalized = f"..bwflow/{normalized}"
+                normalized = f".bwflow/{normalized}"
             return normalized
     except Exception:
         return None
@@ -344,9 +344,8 @@ def get_check_context(repo_root: str, task_dir: str) -> str:
     else:
         # Fallback: use hardcoded check files + spec.jsonl
         check_files = [
-            (".claude/commands/trellis/finish-work.md", "Finish work checklist"),
-            (".claude/commands/trellis/check-cross-layer.md", "Cross-layer check spec"),
-            (".claude/commands/trellis/check.md", "Code quality check spec"),
+            (".claude/commands/bwflow/finish-work/finish-work.CMD.md", "Finish work checklist"),
+            (".claude/commands/bwflow/check/check.CMD.md", "Code quality check spec"),
         ]
         for file_path, description in check_files:
             content = read_file_content(repo_root, file_path)
@@ -356,362 +355,53 @@ def get_check_context(repo_root: str, task_dir: str) -> str:
         # Add spec.jsonl
         spec_entries = read_jsonl_entries(repo_root, f"{task_dir}/spec.jsonl")
         for file_path, content in spec_entries:
-            context_parts.append(f"=== {file_path} (Dev spec) ===\n{content}")
-
-    # 2. Requirements document (for understanding task intent)
-    prd_content = read_file_content(repo_root, f"{task_dir}/prd.md")
-    if prd_content:
-        context_parts.append(
-            f"=== {task_dir}/prd.md (Requirements - for understanding intent) ===\n{prd_content}"
-        )
-
-    return "\n\n".join(context_parts)
-
-
-def get_finish_context(repo_root: str, task_dir: str) -> str:
-    """
-    Complete context for Finish phase (final check before PR)
-
-    Read order:
-    1. All files in finish.jsonl (if exists)
-    2. Fallback to finish-work.md only (lightweight final check)
-    3. update-spec.md (for active spec sync)
-    4. prd.md (for verifying requirements are met)
-    """
-    context_parts = []
-
-    # 1. Try finish.jsonl first
-    finish_entries = read_jsonl_entries(repo_root, f"{task_dir}/finish.jsonl")
-
-    if finish_entries:
-        for file_path, content in finish_entries:
             context_parts.append(f"=== {file_path} ===\n{content}")
-    else:
-        # Fallback: only finish-work.md (lightweight)
-        finish_work = read_file_content(
-            repo_root, ".claude/commands/trellis/finish-work.md"
-        )
-        if finish_work:
-            context_parts.append(
-                f"=== .claude/commands/trellis/finish-work.md (Finish checklist) ===\n{finish_work}"
-            )
 
-    # 2. Spec update process (for active spec sync)
-    update_spec = read_file_content(
-        repo_root, ".claude/commands/trellis/update-spec.md"
-    )
-    if update_spec:
-        context_parts.append(
-            f"=== .claude/commands/trellis/update-spec.md (Spec update process) ===\n{update_spec}"
-        )
-
-    # 3. Requirements document (for verifying requirements are met)
     prd_content = read_file_content(repo_root, f"{task_dir}/prd.md")
     if prd_content:
-        context_parts.append(
-            f"=== {task_dir}/prd.md (Requirements - verify all met) ===\n{prd_content}"
-        )
+        context_parts.append(f"=== {task_dir}/prd.md (Requirements) ===\n{prd_content}")
 
     return "\n\n".join(context_parts)
 
 
 def get_debug_context(repo_root: str, task_dir: str) -> str:
-    """
-    Complete context for Debug Agent
-
-    Read order:
-    1. All files in debug.jsonl (specs needed for fixing)
-    2. codex-review-output.txt (Codex Review results)
-    """
+    """Complete context for Debug Agent"""
     context_parts = []
 
-    # 1. Read debug.jsonl (or fallback to spec.jsonl + hardcoded check files)
     debug_entries = read_jsonl_entries(repo_root, f"{task_dir}/debug.jsonl")
-
-    if debug_entries:
-        for file_path, content in debug_entries:
-            context_parts.append(f"=== {file_path} ===\n{content}")
-    else:
-        # Fallback: use spec.jsonl + hardcoded check files
-        spec_entries = read_jsonl_entries(repo_root, f"{task_dir}/spec.jsonl")
-        for file_path, content in spec_entries:
-            context_parts.append(f"=== {file_path} (Dev spec) ===\n{content}")
-
-        check_files = [
-            (".claude/commands/trellis/check.md", "Code quality check spec"),
-            (".claude/commands/trellis/check-cross-layer.md", "Cross-layer check spec"),
-        ]
-        for file_path, description in check_files:
-            content = read_file_content(repo_root, file_path)
-            if content:
-                context_parts.append(f"=== {file_path} ({description}) ===\n{content}")
-
-    # 2. Codex review output (if exists)
-    codex_output = read_file_content(repo_root, f"{task_dir}/codex-review-output.txt")
-    if codex_output:
-        context_parts.append(
-            f"=== {task_dir}/codex-review-output.txt (Codex Review Results) ===\n{codex_output}"
-        )
+    for file_path, content in debug_entries:
+        context_parts.append(f"=== {file_path} ===\n{content}")
 
     return "\n\n".join(context_parts)
 
 
-def build_implement_prompt(original_prompt: str, context: str) -> str:
-    """Build complete prompt for Implement"""
-    return f"""# Implement Agent Task
-
-You are the Implement Agent in the Multi-Agent Pipeline.
-
-## Your Context
-
-All the information you need has been prepared for you:
-
-{context}
-
----
-
-## Your Task
-
-{original_prompt}
-
----
-
-## Workflow
-
-1. **Understand specs** - All dev specs are injected above, understand them
-2. **Understand requirements** - Read requirements document and technical design
-3. **Implement feature** - Implement following specs and design
-4. **Self-check** - Ensure code quality against check specs
-
-## Important Constraints
-
-- Do NOT execute git commit, only code modifications
-- Follow all dev specs injected above
-- Report list of modified/created files when done"""
-
-
-def build_check_prompt(original_prompt: str, context: str) -> str:
-    """Build complete prompt for Check"""
-    return f"""# Check Agent Task
-
-You are the Check Agent in the Multi-Agent Pipeline (code and cross-layer checker).
-
-## Your Context
-
-All check specs and dev specs you need:
-
-{context}
-
----
-
-## Your Task
-
-{original_prompt}
-
----
-
-## Workflow
-
-1. **Get changes** - Run `git diff --name-only` and `git diff` to get code changes
-2. **Check against specs** - Check item by item against specs above
-3. **Self-fix** - Fix issues directly, don't just report
-4. **Run verification** - Run project's lint and typecheck commands
-
-## Important Constraints
-
-- Fix issues yourself, don't just report
-- Must execute complete checklist in check specs
-- Pay special attention to impact radius analysis (L1-L5)"""
-
-
-def build_finish_prompt(original_prompt: str, context: str) -> str:
-    """Build complete prompt for Finish (final check before PR)"""
-    return f"""# Finish Agent Task
-
-You are performing the final check before creating a PR.
-
-## Your Context
-
-Finish checklist and requirements:
-
-{context}
-
----
-
-## Your Task
-
-{original_prompt}
-
----
-
-## Workflow
-
-1. **Review changes** - Run `git diff --name-only` to see all changed files
-2. **Verify requirements** - Check each requirement in prd.md is implemented
-3. **Spec sync** - Analyze whether changes introduce new patterns, contracts, or conventions
-   - If new pattern/convention found: read target spec file → update it → update index.md if needed
-   - If infra/cross-layer change: follow the 7-section mandatory template from update-spec.md
-   - If pure code fix with no new patterns: skip this step
-4. **Run final checks** - Execute lint and typecheck
-5. **Confirm ready** - Ensure code is ready for PR
-
-## Important Constraints
-
-- You MAY update spec files when gaps are detected (use update-spec.md as guide)
-- MUST read the target spec file BEFORE editing (avoid duplicating existing content)
-- Do NOT update specs for trivial changes (typos, formatting, obvious fixes)
-- If critical CODE issues found, report them clearly (fix specs, not code)
-- Verify all acceptance criteria in prd.md are met"""
-
-
-def build_debug_prompt(original_prompt: str, context: str) -> str:
-    """Build complete prompt for Debug"""
-    return f"""# Debug Agent Task
-
-You are the Debug Agent in the Multi-Agent Pipeline (issue fixer).
-
-## Your Context
-
-Dev specs and Codex Review results:
-
-{context}
-
----
-
-## Your Task
-
-{original_prompt}
-
----
-
-## Workflow
-
-1. **Understand issues** - Analyze issues pointed out in Codex Review
-2. **Locate code** - Find positions that need fixing
-3. **Fix against specs** - Fix issues following dev specs
-4. **Verify fixes** - Run typecheck to ensure no new issues
-
-## Important Constraints
-
-- Do NOT execute git commit, only code modifications
-- Run typecheck after each fix to verify
-- Report which issues were fixed and which files were modified"""
-
-
-def get_research_context(repo_root: str, task_dir: str | None) -> str:
-    """
-    Context for Research Agent
-
-    Research doesn't need much preset context, only needs:
-    1. Project structure overview (where spec directories are)
-    2. Optional research.jsonl (if there are specific search needs)
-    """
+def get_research_context(repo_root: str, task_dir: str) -> str:
+    """Complete context for Research Agent"""
     context_parts = []
 
-    # 1. Project structure overview (dynamically discover spec directories)
-    spec_path = f"{DIR_WORKFLOW}/{DIR_SPEC}"
-    spec_root = Path(repo_root) / DIR_WORKFLOW / DIR_SPEC
+    research_entries = read_jsonl_entries(repo_root, f"{task_dir}/research.jsonl")
+    for file_path, content in research_entries:
+        context_parts.append(f"=== {file_path} ===\n{content}")
 
-    # Build spec tree dynamically
-    tree_lines = [f"{spec_path}/"]
-    if spec_root.is_dir():
-        pkg_dirs = sorted(d for d in spec_root.iterdir() if d.is_dir())
-        for i, pkg_dir in enumerate(pkg_dirs):
-            is_last = i == len(pkg_dirs) - 1
-            prefix = "└── " if is_last else "├── "
-            layers = sorted(d.name for d in pkg_dir.iterdir() if d.is_dir())
-            layer_info = f" ({', '.join(layers)})" if layers else ""
-            tree_lines.append(f"{prefix}{pkg_dir.name}/{layer_info}")
-
-    spec_tree = "\n".join(tree_lines)
-
-    project_structure = f"""## Project Spec Directory Structure
-
-```
-{spec_tree}
-```
-
-To get structured package info, run: `python3 ./{DIR_WORKFLOW}/scripts/get_context.py --mode packages`
-
-## Search Tips
-
-- Spec files: `{spec_path}/**/*.md`
-- Code search: Use Glob and Grep tools
-- Tech solutions: Use mcp__exa__web_search_exa or mcp__exa__get_code_context_exa"""
-
-    context_parts.append(project_structure)
-
-    # 2. If task directory exists, try reading research.jsonl (optional)
-    if task_dir:
-        research_entries = read_jsonl_entries(repo_root, f"{task_dir}/research.jsonl")
-        if research_entries:
-            context_parts.append(
-                "\n## Additional Search Context (from research.jsonl)\n"
-            )
-            for file_path, content in research_entries:
-                context_parts.append(f"=== {file_path} ===\n{content}")
+    prd_content = read_file_content(repo_root, f"{task_dir}/prd.md")
+    if prd_content:
+        context_parts.append(f"=== {task_dir}/prd.md (Requirements) ===\n{prd_content}")
 
     return "\n\n".join(context_parts)
 
 
-def build_research_prompt(original_prompt: str, context: str) -> str:
-    """Build complete prompt for Research"""
-    return f"""# Research Agent Task
-
-You are the Research Agent in the Multi-Agent Pipeline (search researcher).
-
-## Core Principle
-
-**You do one thing: find and explain information.**
-
-You are a documenter, not a reviewer.
-
-## Project Info
-
-{context}
-
----
-
-## Your Task
-
-{original_prompt}
-
----
-
-## Workflow
-
-1. **Understand query** - Determine search type (internal/external) and scope
-2. **Plan search** - List search steps for complex queries
-3. **Execute search** - Execute multiple independent searches in parallel
-4. **Organize results** - Output structured report
-
-## Search Tools
-
-| Tool | Purpose |
-|------|---------|
-| Glob | Search by filename pattern |
-| Grep | Search by content |
-| Read | Read file content |
-| mcp__exa__web_search_exa | External web search |
-| mcp__exa__get_code_context_exa | External code/doc search |
-
-## Strict Boundaries
-
-**Only allowed**: Describe what exists, where it is, how it works
-
-**Forbidden** (unless explicitly asked):
-- Suggest improvements
-- Criticize implementation
-- Recommend refactoring
-- Modify any files
-
-## Report Format
-
-Provide structured search results including:
-- List of files found (with paths)
-- Code pattern analysis (if applicable)
-- Related spec documents
-- External references (if any)"""
+def get_context_for_agent(repo_root: str, task_dir: str, agent_type: str) -> str:
+    """Get context based on agent type"""
+    if agent_type == AGENT_IMPLEMENT:
+        return get_implement_context(repo_root, task_dir)
+    elif agent_type == AGENT_CHECK:
+        return get_check_context(repo_root, task_dir)
+    elif agent_type == AGENT_RESEARCH:
+        return get_research_context(repo_root, task_dir)
+    elif agent_type == AGENT_DEBUG:
+        return get_debug_context(repo_root, task_dir)
+    else:
+        return get_implement_context(repo_root, task_dir)
 
 
 def main():
@@ -720,18 +410,27 @@ def main():
     except json.JSONDecodeError:
         sys.exit(0)
 
-    tool_name = input_data.get("tool_name", "")
+    # Get hook configuration
+    hook_name = input_data.get("hook_name", "")
+    hook_full_name = input_data.get("hook_full_name", "")
 
-    if tool_name not in ("Task", "Agent"):
+    # Get subagent type from arguments
+    # Claude Code uses "subagent_type" in Task tool arguments
+    tool_args = input_data.get("args") or {}
+    subagent_type = (
+        tool_args.get("subagent_type", "")
+        or tool_args.get("name", "")
+        or tool_args.get("type", "")
+    )
+
+    # Get cwd from environment or input
+    cwd = os.environ.get("CLAUDE_PROJECT_DIR") or input_data.get("cwd") or os.getcwd()
+
+    # Only handle Task tool with valid subagent type
+    if tool_args.get("tool", "") != "Task":
         sys.exit(0)
 
-    tool_input = input_data.get("tool_input", {})
-    subagent_type = tool_input.get("subagent_type", "")
-    original_prompt = tool_input.get("prompt", "")
-    cwd = input_data.get("cwd", os.getcwd())
-
-    # Only handle subagent types we care about
-    if subagent_type not in AGENTS_ALL:
+    if not subagent_type or subagent_type not in AGENTS_ALL:
         sys.exit(0)
 
     # Find repo root
@@ -739,64 +438,26 @@ def main():
     if not repo_root:
         sys.exit(0)
 
-    # Get current task directory (research doesn't require it)
+    # Get current task
     task_dir = get_current_task(repo_root)
-
-    # implement/check/debug need task directory
-    if subagent_type in AGENTS_REQUIRE_TASK:
-        if not task_dir:
-            sys.exit(0)
-        # Check if task directory exists
-        task_dir_full = os.path.join(repo_root, task_dir)
-        if not os.path.exists(task_dir_full):
-            sys.exit(0)
-
-        # Update current_phase in task.json (system-level enforcement)
-        update_current_phase(repo_root, task_dir, subagent_type)
-
-    # Check for [finish] marker in prompt (check agent with finish context)
-    is_finish_phase = "[finish]" in original_prompt.lower()
-
-    # Get context and build prompt based on subagent type
-    if subagent_type == AGENT_IMPLEMENT:
-        assert task_dir is not None  # validated above
-        context = get_implement_context(repo_root, task_dir)
-        new_prompt = build_implement_prompt(original_prompt, context)
-    elif subagent_type == AGENT_CHECK:
-        assert task_dir is not None  # validated above
-        if is_finish_phase:
-            # Finish phase: use finish context (lighter, focused on final verification)
-            context = get_finish_context(repo_root, task_dir)
-            new_prompt = build_finish_prompt(original_prompt, context)
-        else:
-            # Regular check phase: use check context (full specs for self-fix loop)
-            context = get_check_context(repo_root, task_dir)
-            new_prompt = build_check_prompt(original_prompt, context)
-    elif subagent_type == AGENT_DEBUG:
-        assert task_dir is not None  # validated above
-        context = get_debug_context(repo_root, task_dir)
-        new_prompt = build_debug_prompt(original_prompt, context)
-    elif subagent_type == AGENT_RESEARCH:
-        # Research can work without task directory
-        context = get_research_context(repo_root, task_dir)
-        new_prompt = build_research_prompt(original_prompt, context)
-    else:
+    if not task_dir:
+        # No active task, allow but don't inject context
         sys.exit(0)
 
+    # Update phase
+    update_current_phase(repo_root, task_dir, subagent_type)
+
+    # Get context
+    context = get_context_for_agent(repo_root, task_dir, subagent_type)
     if not context:
         sys.exit(0)
 
-    # Return updated input with correct Claude Code PreToolUse format
-    output = {
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow",
-            "updatedInput": {**tool_input, "prompt": new_prompt},
-        }
+    # For Claude Code, we output a JSON with the context to prepend
+    # Claude Code will prepend this to the subagent prompt
+    result = {
+        "subagent_prompt_prepend": context
     }
-
-    print(json.dumps(output, ensure_ascii=False))
-    sys.exit(0)
+    print(json.dumps(result, ensure_ascii=False))
 
 
 if __name__ == "__main__":

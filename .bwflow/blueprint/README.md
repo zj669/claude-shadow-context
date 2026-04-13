@@ -55,8 +55,3 @@
 
 ---
 
-## 相关命令
-
-- `/bwflow:explore` — 蓝图优先探索
-- `/bwflow:align` — 蓝图对齐检查
-- `/bwflow:init` — 初始化项目蓝图层

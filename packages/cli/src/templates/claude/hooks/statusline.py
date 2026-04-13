@@ -2,13 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Trellis StatusLine — project-level status display for Claude Code.
-
-Reads Claude Code session JSON from stdin + Trellis task data from filesystem.
-Outputs 1-2 lines:
-  With active task:  [P1] Task title (status)  +  info line
-  Without task:      info line only
-Info line: model · ctx% · branch · duration · developer · tasks · rate limits
 """
+
 from __future__ import annotations
 
 import json
@@ -49,7 +44,7 @@ def _normalize_task_ref(task_ref: str) -> str:
         normalized = normalized[2:]
 
     if normalized.startswith("tasks/"):
-        return f"..bwflow/{normalized}"
+        return f".bwflow/{normalized}"
 
     return normalized
 
@@ -59,16 +54,16 @@ def _resolve_task_dir(trellis_dir: Path, task_ref: str) -> Path:
     path_obj = Path(normalized)
     if path_obj.is_absolute():
         return path_obj
-    if normalized.startswith("..bwflow/"):
+    if normalized.startswith(".bwflow/"):
         return trellis_dir.parent / path_obj
     return trellis_dir / "tasks" / path_obj
 
 
 def _find_trellis_dir() -> Path | None:
-    """Walk up from cwd to find bwflow directory."""
+    """Walk up from cwd to find .bwflow directory."""
     current = Path.cwd()
     for parent in [current, *current.parents]:
-        candidate = parent / "bwflow"
+        candidate = parent / ".bwflow"
         if candidate.is_dir():
             return candidate
     return None
@@ -80,7 +75,6 @@ def _get_current_task(trellis_dir: Path) -> dict | None:
     if not task_ref:
         return None
 
-    # Resolve task directory
     task_path = _resolve_task_dir(trellis_dir, task_ref)
     task_data = _read_json(task_path / "task.json")
     if not task_data:
@@ -144,7 +138,6 @@ def _format_duration(ms: int) -> str:
 
 
 def main() -> None:
-    # Read Claude Code session JSON from stdin
     try:
         cc_data = json.loads(sys.stdin.read())
     except (json.JSONDecodeError, ValueError):
@@ -153,25 +146,21 @@ def main() -> None:
     trellis_dir = _find_trellis_dir()
     SEP = " \033[90m·\033[0m "
 
-    # --- Trellis data ---
     task = _get_current_task(trellis_dir) if trellis_dir else None
     dev = _get_developer(trellis_dir) if trellis_dir else ""
     task_count = _count_active_tasks(trellis_dir) if trellis_dir else 0
 
-    # --- CC session data ---
     model = cc_data.get("model", {}).get("display_name", "?")
     ctx_pct = int(cc_data.get("context_window", {}).get("used_percentage") or 0)
     ctx_size = _format_ctx_size(cc_data.get("context_window", {}).get("context_window_size") or 0)
     duration = _format_duration(cc_data.get("cost", {}).get("total_duration_ms") or 0)
     branch = _get_git_branch()
 
-    # Avoid "Opus 4.6 (1M context) (1M)"
     if re.search(r"\d+[KMG]\b", model, re.IGNORECASE):
         model_label = model
     else:
         model_label = f"{model} ({ctx_size})"
 
-    # Context % with color
     if ctx_pct >= 90:
         ctx_color = "\033[31m"
     elif ctx_pct >= 70:
@@ -179,7 +168,6 @@ def main() -> None:
     else:
         ctx_color = "\033[32m"
 
-    # Build info line: model · ctx · branch · duration · dev · tasks [· rate limits]
     parts = [
         model_label,
         f"ctx {ctx_color}{ctx_pct}%\033[0m",
@@ -201,7 +189,6 @@ def main() -> None:
 
     info_line = SEP.join(parts)
 
-    # Output: task line (only if active) + info line
     if task:
         print(f"\033[36m[{task['priority']}]\033[0m {task['title']} \033[33m({task['status']})\033[0m")
     print(info_line)
