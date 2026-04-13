@@ -1,110 +1,46 @@
 # bwflow
 
-> Blueprint Workflow - 蓝图驱动的 AI 开发伴侣，基于 Trellis 构建
+> 蓝图驱动的结构化 AI 开发伴侣
 
-```
-$ bw init
-✅ 初始化完成
+bwflow 是一个 Blueprint Workflow CLI 工具，它将**蓝图优先**的理解心智与**结构化工作流**深度融合，帮助 AI 在更短上下文中理解项目，并在任务结束后保持理解可信。
 
-$ /bw start
-📋 读取上下文...
-🚀 开始会话
-```
+## 核心能力
 
-## 为什么需要 bwflow？
+bwflow 围绕三个原语组织：
 
-| 痛点 | bwflow 解决方案 |
-|------|------------------|
-| AI 不理解项目架构 | Blueprint 层沉淀架构意图 |
-| 每次都要重复解释规范 | Spec 层统一注入上下文 |
-| 任务上下文丢失 | 任务 + 会话连续性 |
-| Agent 实现质量不一 | Subagent 循环验证 |
+1. **init** — 为项目初始化蓝图层和工作流结构
+2. **explore** — 蓝图优先探索，用最小上下文获得足够准确的项目理解
+3. **align** — 任务结束后检查蓝图是否仍与代码对齐
 
-## Quick Start
+加上从 Trellis 借鉴的：
+
+4. **plan** — 需求分析，生成 PRD 和任务上下文
+5. **implement** — 实现阶段，Hook 自动注入蓝图和规范上下文
+6. **check** — 质量检查，Ralph Loop 守护直到达标
+7. **finish** — 收尾，align 蓝图 + 记录会话 + 同步规范
+
+## 快速开始
+
+### 安装
 
 ```bash
-# 安装
 npm install -g @zj669/bwflow
-
-# 初始化项目
-bw init
-
-# Claude Code 中使用
-/bw start
 ```
 
-## Features
-
-| 功能 | 说明 |
-|------|------|
-| **Blueprint 层** | 架构意图，设计决策文档化 |
-| **Spec 层** | 编码标准自动注入上下文 |
-| **8 个命令** | start, before-dev, finish 等 |
-| **子 Agent 支持** | Implement / Check / Debug |
-| **Ralph Loop** | Check Agent 循环验证直到通过 |
-| **会话连续性** | Journal + Task 追踪 |
-
-## Commands
-
-### Claude Code
-
-| 命令 | 说明 |
-|------|------|
-| `/bw start` | 开始会话，读取上下文 |
-| `/bw before-dev` | 开发前检查规范 |
-| `/bw finish` | 完成任务，验证质量 |
-| `/bw record` | 记录会话摘要 |
-| `/bw brainstorm` | 需求探索 |
-| `/bw check` | 代码检查 |
-| `/bw parallel` | 并行任务 |
-| `/bw update-spec` | 更新规范 |
-
-### CLI
+### 初始化项目
 
 ```bash
-bw init    # 初始化项目
-bw sync    # 同步配置
+cd my-project
+bw init -u your-name --targets claudecode,cursor
 ```
 
-## Architecture
 
-```
-.bwflow/                    # 核心工作流
-├── blueprint/               # 架构蓝图 (新增)
-├── spec/                    # 编码规范
-├── tasks/                   # 任务追踪
-├── workspace/                # 会话记忆
-├── workflow.md              # 工作流规则
-└── scripts/                 # Python 工具
-    ├── task.py             # 任务管理
-    ├── get_context.py       # 上下文获取
-    └── hooks/               # 生命周期钩子
-        ├── session-start.py
-        ├── inject-subagent-context.py
-        ├── ralph-loop.py
-        └── statusline.py
+## 设计原则
 
-.claude/
-└── commands/bwflow/        # Claude Code 命令
-```
-
-### 两层理解框架
-
-| 层 | 回答 | 位置 |
-|---|------|------|
-| Blueprint | "为什么这样设计？" | `.bwflow/blueprint/` |
-| Spec | "如何编写符合项目风格？" | `.bwflow/spec/` |
-
-## Development Flow
-
-```
-/bw start      → 读取 Blueprint + Spec 索引
-/bw before-dev → 开发前检查规范
-[实现功能]
-/bw finish     → 质量验证 + Blueprint 对齐
-git commit
-/bw record     → 记录会话
-```
+1. **蓝图优先**：优先读取意图层，而不是先散搜实现层
+2. **最小上下文**：蓝图足够时，不扩读实现细节
+3. **结束对齐**：每次任务结束都应考虑蓝图是否仍然可信
+4. **自我学习**：从失败中沉淀经验，形成可复用的 Evolved Skills
 
 ## License
 

@@ -1,10 +1,10 @@
 {
   "name": "@zj669/bwflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blueprint Workflow CLI - 蓝图驱动的结构化 AI 开发伴侣",
   "type": "module",
   "bin": {
-    "bw": "./dist/index.js"
+    "bw": "dist/index.js"
   },
   "scripts": {
     "build": "tsc && npm run copy-templates",
