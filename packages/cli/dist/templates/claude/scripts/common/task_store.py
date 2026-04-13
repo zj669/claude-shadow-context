@@ -314,7 +314,7 @@ def cmd_archive(args: argparse.Namespace) -> int:
 
 
 def _auto_commit_archive(task_name: str, repo_root: Path) -> None:
-    """Stage .trellis/tasks/ changes and commit after archive."""
+    """Stage bwflow/tasks/ changes and commit after archive."""
     tasks_rel = f"{DIR_WORKFLOW}/{DIR_TASKS}"
     run_git(["add", "-A", tasks_rel], cwd=repo_root)
 
@@ -464,7 +464,7 @@ def cmd_set_branch(args: argparse.Namespace) -> int:
     print(colored(f"✓ Branch set to: {branch}", Colors.GREEN))
     print()
     print(colored("Now you can start the multi-agent pipeline:", Colors.BLUE))
-    print(f"  python3 ./.trellis/scripts/multi_agent/start.py {args.dir}")
+    print(f"  python3 ./bwflow/scripts/multi_agent/start.py {args.dir}")
     return 0
 
 

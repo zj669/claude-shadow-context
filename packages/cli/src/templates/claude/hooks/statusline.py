@@ -65,7 +65,7 @@ def _resolve_task_dir(trellis_dir: Path, task_ref: str) -> Path:
 
 
 def _find_trellis_dir() -> Path | None:
-    """Walk up from cwd to find bwflow/ directory."""
+    """Walk up from cwd to find bwflow directory."""
     current = Path.cwd()
     for parent in [current, *current.parents]:
         candidate = parent / "bwflow"

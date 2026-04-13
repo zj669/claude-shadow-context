@@ -6,8 +6,8 @@ Usage:
     python3 init_developer.py <developer-name>
 
 This creates:
-    - .trellis/.developer file with developer info
-    - .trellis/workspace/<name>/ directory structure
+    - bwflow/.developer file with developer info
+    - bwflow/workspace/<name>/ directory structure
 """
 
 from __future__ import annotations

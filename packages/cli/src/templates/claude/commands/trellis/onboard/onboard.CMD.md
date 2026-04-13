@@ -41,7 +41,7 @@ Every AI session starts with a blank slate. Unlike human engineers who accumulat
 
 **The Problem**: Without memory, AI asks the same questions repeatedly, makes the same mistakes, and can't build on previous work.
 
-**The Solution**: The `.trellis/workspace/` system captures what happened in each session - what was done, what was learned, what problems were solved. The `/trellis:start` command reads this history at session start, giving AI "artificial memory."
+**The Solution**: The `bwflow/workspace/` system captures what happened in each session - what was done, what was learned, what problems were solved. The `/trellis:start` command reads this history at session start, giving AI "artificial memory."
 
 ### Challenge 2: AI Has Generic Knowledge, Not Project-Specific Knowledge
 
@@ -49,7 +49,7 @@ AI models are trained on millions of codebases - they know general patterns for 
 
 **The Problem**: AI writes code that "works" but doesn't match your project's style. It uses patterns that conflict with existing code. It makes decisions that violate unwritten team rules.
 
-**The Solution**: The `.trellis/spec/` directory contains project-specific guidelines. The `/before-*-dev` commands inject this specialized knowledge into AI context before coding starts.
+**The Solution**: The `bwflow/spec/` directory contains project-specific guidelines. The `/before-*-dev` commands inject this specialized knowledge into AI context before coding starts.
 
 ### Challenge 3: AI Context Window Is Limited
 
@@ -64,7 +64,7 @@ Even after injecting guidelines, AI has limited context window. As conversation 
 ## SYSTEM STRUCTURE
 
 ```
-.trellis/
+bwflow/
 |-- .developer              # Your identity (gitignored)
 |-- workflow.md             # Complete workflow documentation
 |-- workspace/              # "AI Memory" - session history
@@ -210,7 +210,7 @@ All the context AI built during this session will be lost when session ends. The
 ### Example 1: Bug Fix Session
 
 **[1/8] /trellis:start** - AI needs project context before touching code
-**[2/8] python3 ./.trellis/scripts/task.py create "Fix bug" --slug fix-bug** - Track work for future reference
+**[2/8] python3 ./bwflow/scripts/task.py create "Fix bug" --slug fix-bug** - Track work for future reference
 **[3/8] /trellis:before-dev** - Inject project-specific development guidelines
 **[4/8] Investigate and fix the bug** - Actual development work
 **[5/8] /trellis:check** - Re-verify code against guidelines
@@ -221,7 +221,7 @@ All the context AI built during this session will be lost when session ends. The
 ### Example 2: Planning Session (No Code)
 
 **[1/4] /trellis:start** - Context needed even for non-coding work
-**[2/4] python3 ./.trellis/scripts/task.py create "Planning task" --slug planning-task** - Planning is valuable work
+**[2/4] python3 ./bwflow/scripts/task.py create "Planning task" --slug planning-task** - Planning is valuable work
 **[3/4] Review docs, create subtask list** - Actual planning work
 **[4/4] /trellis:record-session (with --summary)** - Planning decisions must be recorded
 
@@ -268,12 +268,12 @@ After explaining Part 1 and Part 2, check if the project's development guideline
 
 ## Step 1: Check Current Guidelines Status
 
-Check if `.trellis/spec/` contains empty templates or customized guidelines:
+Check if `bwflow/spec/` contains empty templates or customized guidelines:
 
 ```bash
 # Check if files are still empty templates (look for placeholder text)
-grep -l "To be filled by the team" .trellis/spec/backend/*.md 2>/dev/null | wc -l
-grep -l "To be filled by the team" .trellis/spec/frontend/*.md 2>/dev/null | wc -l
+grep -l "To be filled by the team" bwflow/spec/backend/*.md 2>/dev/null | wc -l
+grep -l "To be filled by the team" bwflow/spec/frontend/*.md 2>/dev/null | wc -l
 ```
 
 ## Step 2: Determine Situation
@@ -284,7 +284,7 @@ If guidelines are empty templates (contain "To be filled by the team"), this is 
 
 Explain to the developer:
 
-"I see that the development guidelines in `.trellis/spec/` are still empty templates. This is normal for a new Trellis setup!
+"I see that the development guidelines in `bwflow/spec/` are still empty templates. This is normal for a new Trellis setup!
 
 The templates contain placeholder text that needs to be replaced with YOUR project's actual conventions. Without this, `/before-*-dev` commands won't provide useful guidance.
 
@@ -294,7 +294,7 @@ The templates contain placeholder text that needs to be replaced with YOUR proje
 2. Identify the patterns and conventions already in use
 3. Document them in the guideline files
 
-For example, for `.trellis/spec/backend/database-guidelines.md`:
+For example, for `bwflow/spec/backend/database-guidelines.md`:
 - What ORM/query library does your project use?
 - How are migrations managed?
 - What naming conventions for tables/columns?
@@ -309,14 +309,14 @@ Explain to the developer:
 
 "Great! Your team has already customized the development guidelines. You can start using `/before-*-dev` commands right away.
 
-I recommend reading through `.trellis/spec/` to familiarize yourself with the team's coding standards."
+I recommend reading through `bwflow/spec/` to familiarize yourself with the team's coding standards."
 
 ## Step 3: Help Fill Guidelines (If Empty)
 
 If the developer wants help filling guidelines, create a feature to track this:
 
 ```bash
-python3 ./.trellis/scripts/task.py create "Fill spec guidelines" --slug fill-spec-guidelines
+python3 ./bwflow/scripts/task.py create "Fill spec guidelines" --slug fill-spec-guidelines
 ```
 
 Then systematically analyze the codebase and fill each guideline file:
@@ -352,7 +352,7 @@ After covering all three parts, summarize:
 
 **Next steps** (tell user):
 1. Run `/trellis:record-session` to record this onboard session
-2. [If guidelines empty] Start filling in `.trellis/spec/` guidelines
+2. [If guidelines empty] Start filling in `bwflow/spec/` guidelines
 3. [If guidelines ready] Start your first development task
 
 What would you like to do first?"

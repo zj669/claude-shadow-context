@@ -12,10 +12,10 @@ Arguments:
     project-type: frontend | backend | fullstack (default: fullstack)
 
 Prerequisites:
-    - .trellis/.developer must exist (run init_developer.py first)
+    - bwflow/.developer must exist (run init_developer.py first)
 
 Creates:
-    .trellis/tasks/00-bootstrap-guidelines/
+    bwflow/tasks/00-bootstrap-guidelines/
         - task.json    # Task metadata
         - prd.md       # Task description and guidance
 """
@@ -58,7 +58,7 @@ def write_prd_header() -> str:
 
 Welcome to Trellis! This is your first task.
 
-AI agents use `.trellis/spec/` to understand YOUR project's coding conventions.
+AI agents use `bwflow/spec/` to understand YOUR project's coding conventions.
 **Starting from scratch = AI writes generic code that doesn't match your project style.**
 
 Filling these guidelines is a one-time setup that pays off for every future AI session.
@@ -79,11 +79,11 @@ def write_prd_backend_section(spec_base: str) -> str:
 
 | File | What to Document |
 |------|------------------|
-| `.trellis/{spec_base}/backend/directory-structure.md` | Where different file types go (routes, services, utils) |
-| `.trellis/{spec_base}/backend/database-guidelines.md` | ORM, migrations, query patterns, naming conventions |
-| `.trellis/{spec_base}/backend/error-handling.md` | How errors are caught, logged, and returned |
-| `.trellis/{spec_base}/backend/logging-guidelines.md` | Log levels, format, what to log |
-| `.trellis/{spec_base}/backend/quality-guidelines.md` | Code review standards, testing requirements |
+| `bwflow/{spec_base}/backend/directory-structure.md` | Where different file types go (routes, services, utils) |
+| `bwflow/{spec_base}/backend/database-guidelines.md` | ORM, migrations, query patterns, naming conventions |
+| `bwflow/{spec_base}/backend/error-handling.md` | How errors are caught, logged, and returned |
+| `bwflow/{spec_base}/backend/logging-guidelines.md` | Log levels, format, what to log |
+| `bwflow/{spec_base}/backend/quality-guidelines.md` | Code review standards, testing requirements |
 """
 
 
@@ -95,12 +95,12 @@ def write_prd_frontend_section(spec_base: str) -> str:
 
 | File | What to Document |
 |------|------------------|
-| `.trellis/{spec_base}/frontend/directory-structure.md` | Component/page/hook organization |
-| `.trellis/{spec_base}/frontend/component-guidelines.md` | Component patterns, props conventions |
-| `.trellis/{spec_base}/frontend/hook-guidelines.md` | Custom hook naming, patterns |
-| `.trellis/{spec_base}/frontend/state-management.md` | State library, patterns, what goes where |
-| `.trellis/{spec_base}/frontend/type-safety.md` | TypeScript conventions, type organization |
-| `.trellis/{spec_base}/frontend/quality-guidelines.md` | Linting, testing, accessibility |
+| `bwflow/{spec_base}/frontend/directory-structure.md` | Component/page/hook organization |
+| `bwflow/{spec_base}/frontend/component-guidelines.md` | Component patterns, props conventions |
+| `bwflow/{spec_base}/frontend/hook-guidelines.md` | Custom hook naming, patterns |
+| `bwflow/{spec_base}/frontend/state-management.md` | State library, patterns, what goes where |
+| `bwflow/{spec_base}/frontend/type-safety.md` | TypeScript conventions, type organization |
+| `bwflow/{spec_base}/frontend/quality-guidelines.md` | Linting, testing, accessibility |
 """
 
 
@@ -110,7 +110,7 @@ def write_prd_footer() -> str:
 
 ### Thinking Guides (Optional)
 
-The `.trellis/spec/guides/` directory contains thinking guides that are already
+The `bwflow/spec/guides/` directory contains thinking guides that are already
 filled with general best practices. You can customize them for your project if needed.
 
 ---
@@ -152,8 +152,8 @@ The AI will read your code and help you document it.
 When done:
 
 ```bash
-python3 ./.trellis/scripts/task.py finish
-python3 ./.trellis/scripts/task.py archive 00-bootstrap-guidelines
+python3 ./bwflow/scripts/task.py finish
+python3 ./bwflow/scripts/task.py archive 00-bootstrap-guidelines
 ```
 
 ---
@@ -201,20 +201,20 @@ def write_task_json(task_dir: Path, developer: str, project_type: str, spec_base
             {"name": "Fill frontend guidelines", "status": "pending"},
             {"name": "Add code examples", "status": "pending"},
         ]
-        related_files = [f".trellis/{spec_base}/frontend/"]
+        related_files = [f"bwflow/{spec_base}/frontend/"]
     elif project_type == "backend":
         subtasks = [
             {"name": "Fill backend guidelines", "status": "pending"},
             {"name": "Add code examples", "status": "pending"},
         ]
-        related_files = [f".trellis/{spec_base}/backend/"]
+        related_files = [f"bwflow/{spec_base}/backend/"]
     else:  # fullstack
         subtasks = [
             {"name": "Fill backend guidelines", "status": "pending"},
             {"name": "Fill frontend guidelines", "status": "pending"},
             {"name": "Add code examples", "status": "pending"},
         ]
-        related_files = [f".trellis/{spec_base}/backend/", f".trellis/{spec_base}/frontend/"]
+        related_files = [f"bwflow/{spec_base}/backend/", f"bwflow/{spec_base}/frontend/"]
 
     task_data = {
         "id": TASK_NAME,

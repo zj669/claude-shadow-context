@@ -55,7 +55,7 @@ For triggered tasks, include all sections below:
 ## Spec Structure Overview
 
 ```
-.trellis/spec/
+bwflow/spec/
 ├── backend/           # Backend coding standards
 │   ├── index.md       # Overview and links
 │   └── *.md           # Topic-specific guidelines
@@ -120,7 +120,7 @@ Before editing, read the current code-spec to:
 - Find the right section for your update
 
 ```bash
-cat .trellis/spec/<category>/<file>.md
+cat bwflow/spec/<category>/<file>.md
 ```
 
 ### Step 4: Make the Update

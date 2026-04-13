@@ -314,16 +314,16 @@ def update_index(
 # =============================================================================
 
 def _auto_commit_workspace(repo_root: Path) -> None:
-    """Stage .trellis/workspace and .trellis/tasks, then commit with a configured message."""
+    """Stage bwflow/workspace and bwflow/tasks, then commit with a configured message."""
     commit_msg = get_session_commit_message(repo_root)
     subprocess.run(
-        ["git", "add", "-A", ".trellis/workspace", ".trellis/tasks"],
+        ["git", "add", "-A", "bwflow/workspace", "bwflow/tasks"],
         cwd=repo_root,
         capture_output=True,
     )
     # Check if there are staged changes
     result = subprocess.run(
-        ["git", "diff", "--cached", "--quiet", "--", ".trellis/workspace", ".trellis/tasks"],
+        ["git", "diff", "--cached", "--quiet", "--", "bwflow/workspace", "bwflow/tasks"],
         cwd=repo_root,
     )
     if result.returncode == 0:

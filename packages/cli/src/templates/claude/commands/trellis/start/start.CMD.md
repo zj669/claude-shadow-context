@@ -20,7 +20,7 @@ Initialize your AI development session and begin working on tasks.
 First, read the workflow guide to understand the development process:
 
 ```bash
-cat .trellis/workflow.md
+cat bwflow/workflow.md
 ```
 
 **Follow the instructions in workflow.md** - it contains:
@@ -32,31 +32,62 @@ cat .trellis/workflow.md
 ### Step 2: Get Current Context
 
 ```bash
-python3 ./.trellis/scripts/get_context.py
+python3 ./bwflow/scripts/get_context.py
 ```
 
 This shows: developer identity, git status, current task (if any), active tasks.
 
-### Step 3: Read Guidelines Index
+### Step 3: Read Blueprint (Architecture Intent)
+
+**Read the project blueprint to understand the architecture:**
 
 ```bash
-python3 ./.trellis/scripts/get_context.py --mode packages
+cat bwflow/blueprint/README.md              # Root blueprint
+cat bwflow/blueprint/src/README.md          # Source modules (if exists)
+```
+
+The blueprint answers: **"Why is the architecture designed this way?"**
+
+### Step 4: Read Guidelines Index
+
+```bash
+python3 ./bwflow/scripts/get_context.py --mode packages
 ```
 
 This shows available packages and their spec layers. Read the relevant spec indexes:
 
 ```bash
-cat .trellis/spec/<package>/<layer>/index.md   # Package-specific guidelines
-cat .trellis/spec/guides/index.md              # Thinking guides (always read)
+cat bwflow/spec/<package>/<layer>/index.md   # Package-specific guidelines
+cat bwflow/spec/guides/index.md              # Thinking guides (always read)
 ```
 
 > **Important**: The index files are navigation — they list the actual guideline files (e.g., `error-handling.md`, `conventions.md`, `mock-strategies.md`).
 > At this step, just read the indexes to understand what's available.
 > When you start actual development, you MUST go back and read the specific guideline files relevant to your task, as listed in the index's Pre-Development Checklist.
 
-### Step 4: Report and Ask
+### Step 5: Report and Ask
 
 Report what you learned and ask: "What would you like to work on?"
+
+---
+
+## Blueprint + Spec Integration
+
+### Two-Layer Understanding
+
+| Layer | Answers | Location |
+|-------|---------|----------|
+| **Blueprint** | "Why?" - Architecture intent, design decisions | `bwflow/blueprint/` |
+| **Spec** | "How?" - Coding standards, patterns, conventions | `bwflow/spec/` |
+
+**Read order**: Blueprint first (understand intent) → Spec second (follow conventions)
+
+### When to Read Blueprints
+
+- Before understanding a new module
+- When making architectural decisions
+- When the codebase structure is unclear
+- Before complex refactoring
 
 ---
 
@@ -100,7 +131,7 @@ When user describes a task, classify it:
 For questions or trivial fixes, work directly:
 
 1. Answer question or make the fix
-2. If code was changed, remind user to run `/trellis:finish-work`
+2. If code was changed, remind user to run `/bw finish`
 
 ---
 
@@ -113,7 +144,7 @@ For simple, well-defined tasks:
 3. **If yes: execute ALL steps below without stopping. Do NOT ask for additional confirmation between steps.**
    - Create task directory (Phase 1 Path B, Step 2)
    - Write PRD (Step 3)
-   - Research codebase (Phase 2, Step 5)
+   - Research codebase + Blueprint (Phase 2, Step 5)
    - Configure context (Step 6)
    - Activate task (Step 7)
    - Implement (Phase 3, Step 8)
@@ -126,7 +157,7 @@ For simple, well-defined tasks:
 
 For complex or vague tasks, **automatically start the brainstorm process** — do NOT skip directly to implementation.
 
-See `/trellis:brainstorm` for the full process. Summary:
+See `/bw brainstorm` for the full process. Summary:
 
 1. **Acknowledge and classify** - State your understanding
 2. **Create task directory** - Track evolving requirements in `prd.md`
@@ -137,7 +168,7 @@ See `/trellis:brainstorm` for the full process. Summary:
 
 > **Subtask Decomposition**: If brainstorm reveals multiple independent work items,
 > consider creating subtasks using `--parent` flag or `add-subtask` command.
-> See `/trellis:brainstorm` Step 8 for details.
+> See `/bw brainstorm` Step 8 for details.
 
 ### Key Brainstorm Principles
 
@@ -153,8 +184,8 @@ See `/trellis:brainstorm` for the full process. Summary:
 ## Task Workflow (Development Tasks)
 
 **Why this workflow?**
-- Research Agent analyzes what code-spec files are needed
-- Code-spec files are configured in jsonl files
+- Research Agent analyzes what code-spec files and blueprints are needed
+- Code-spec files and blueprints are configured in jsonl files
 - Implement Agent receives code-spec context via Hook injection
 - Check Agent verifies against code-spec requirements
 - Result: Code that follows project conventions automatically
@@ -163,10 +194,10 @@ See `/trellis:brainstorm` for the full process. Summary:
 
 ```
 From Brainstorm (Complex Task):
-  PRD confirmed → Research → Configure Context → Activate → Implement → Check → Complete
+  PRD confirmed → Research + Blueprint → Configure Context → Activate → Implement → Check → Complete
 
 From Simple Task:
-  Confirm → Create Task → Write PRD → Research → Configure Context → Activate → Implement → Check → Complete
+  Confirm → Create Task → Write PRD → Research + Blueprint → Configure Context → Activate → Implement → Check → Complete
 ```
 
 **Key principle: Research happens AFTER requirements are clear (PRD exists).**
@@ -191,7 +222,7 @@ Quick confirm:
 **Step 2: Create Task Directory** `[AI]`
 
 ```bash
-TASK_DIR=$(python3 ./.trellis/scripts/task.py create "<title>" --slug <name>)
+TASK_DIR=$(python3 ./bwflow/scripts/task.py create "<title>" --slug <name>)
 ```
 
 **Step 3: Write PRD** `[AI]`
@@ -222,25 +253,27 @@ Create `prd.md` in the task directory with:
 
 > Both paths converge here. PRD and task directory must exist before proceeding.
 
-**Step 4: Code-Spec Depth Check** `[AI]`
+**Step 4: Blueprint + Code-Spec Depth Check** `[AI]`
 
-If the task touches infra or cross-layer contracts, do not start implementation until code-spec depth is defined.
+If the task touches infra or cross-layer contracts, do not start implementation until blueprint and code-spec depth is defined.
 
 Trigger this requirement when the change includes any of:
 - New or changed command/API signatures
 - Database schema or migration changes
 - Infra integrations (storage, queue, cache, secrets, env contracts)
 - Cross-layer payload transformations
+- New modules or architectural changes
 
 Must-have before proceeding:
+- [ ] Related blueprints are identified and read
 - [ ] Target code-spec files to update are identified
 - [ ] Concrete contract is defined (signature, fields, env keys)
 - [ ] Validation and error matrix is defined
 - [ ] At least one Good/Base/Bad case is defined
 
-**Step 5: Research the Codebase** `[AI]`
+**Step 5: Research the Codebase + Blueprints** `[AI]`
 
-Based on the confirmed PRD, call Research Agent to find relevant specs and patterns:
+Based on the confirmed PRD, call Research Agent to find relevant specs, blueprints, and patterns:
 
 ```
 Task(
@@ -251,11 +284,16 @@ Task(
   Type: <frontend/backend/fullstack>
 
   Please find:
-  1. Relevant code-spec files in .trellis/spec/
-  2. Existing code patterns to follow (find 2-3 examples)
-  3. Files that will likely need modification
+  1. Relevant blueprint files in bwflow/blueprint/ (architecture intent)
+  2. Relevant code-spec files in bwflow/spec/
+  3. Existing code patterns to follow (find 2-3 examples)
+  4. Files that will likely need modification
 
   Output:
+  ## Relevant Blueprints
+  - <path>: <why this blueprint matters>
+     - Key design decisions: <list>
+
   ## Relevant Code-Specs
   - <path>: <why it's relevant>
 
@@ -273,22 +311,25 @@ Task(
 Initialize default context:
 
 ```bash
-python3 ./.trellis/scripts/task.py init-context "$TASK_DIR" <type>
+python3 ./bwflow/scripts/task.py init-context "$TASK_DIR" <type>
 # type: backend | frontend | fullstack
 ```
 
-Add code-spec files found by Research Agent:
+Add blueprint and code-spec files found by Research Agent:
 
 ```bash
-# For each relevant code-spec and code pattern:
-python3 ./.trellis/scripts/task.py add-context "$TASK_DIR" implement "<path>" "<reason>"
-python3 ./.trellis/scripts/task.py add-context "$TASK_DIR" check "<path>" "<reason>"
+# For each relevant blueprint:
+python3 ./bwflow/scripts/task.py add-context "$TASK_DIR" implement "<path>" "<reason>"
+
+# For each relevant code-spec:
+python3 ./bwflow/scripts/task.py add-context "$TASK_DIR" implement "<path>" "<reason>"
+python3 ./bwflow/scripts/task.py add-context "$TASK_DIR" check "<path>" "<reason>"
 ```
 
 **Step 7: Activate Task** `[AI]`
 
 ```bash
-python3 ./.trellis/scripts/task.py start "$TASK_DIR"
+python3 ./bwflow/scripts/task.py start "$TASK_DIR"
 ```
 
 This sets `.current-task` so hooks can inject context.
@@ -299,14 +340,14 @@ This sets `.current-task` so hooks can inject context.
 
 **Step 8: Implement** `[AI]`
 
-Call Implement Agent (code-spec context is auto-injected by hook):
+Call Implement Agent (blueprint and code-spec context is auto-injected by hook):
 
 ```
 Task(
   subagent_type: "implement",
   prompt: "Implement the task described in prd.md.
 
-  Follow all code-spec files that have been injected into your context.
+  Follow all blueprint files (architecture intent) and code-spec files (conventions) injected into your context.
   Run lint and typecheck before finishing.",
   model: "opus"
 )
@@ -314,12 +355,12 @@ Task(
 
 **Step 9: Check Quality** `[AI]`
 
-Call Check Agent (code-spec context is auto-injected by hook):
+Call Check Agent (blueprint and code-spec context is auto-injected by hook):
 
 ```
 Task(
   subagent_type: "check",
-  prompt: "Review all code changes against the code-spec requirements.
+  prompt: "Review all code changes against the blueprint requirements and code-spec standards.
 
   Fix any issues you find directly.
   Ensure lint and typecheck pass.",
@@ -334,7 +375,7 @@ Task(
 3. Remind user to:
    - Test the changes
    - Commit when ready
-   - Run `/trellis:record-session` to record this session
+   - Run `/bw record` to record this session
 
 ---
 
@@ -356,38 +397,44 @@ If yes, resume from the appropriate step (usually Step 7 or 8).
 
 | Command | When to Use |
 |---------|-------------|
-| `/trellis:start` | Begin a session (this command) |
-| `/trellis:brainstorm` | Clarify vague requirements (called from start) |
-| `/trellis:parallel` | Complex tasks needing isolated worktree |
-| `/trellis:finish-work` | Before committing changes |
-| `/trellis:record-session` | After completing a task |
+| `/bw start` | Begin a session (this command) |
+| `/bw brainstorm` | Clarify vague requirements (called from start) |
+| `/bw parallel` | Complex tasks needing isolated worktree |
+| `/bw finish` | Before committing changes |
+| `/bw record` | After completing a task |
 
 ### AI Scripts `[AI]`
 
 | Script | Purpose |
 |--------|---------|
-| `python3 ./.trellis/scripts/get_context.py` | Get session context |
-| `python3 ./.trellis/scripts/task.py create` | Create task directory |
-| `python3 ./.trellis/scripts/task.py init-context` | Initialize jsonl files |
-| `python3 ./.trellis/scripts/task.py add-context` | Add code-spec/context file to jsonl |
-| `python3 ./.trellis/scripts/task.py start` | Set current task |
-| `python3 ./.trellis/scripts/task.py finish` | Clear current task |
-| `python3 ./.trellis/scripts/task.py archive` | Archive completed task |
+| `python3 ./bwflow/scripts/get_context.py` | Get session context |
+| `python3 ./bwflow/scripts/task.py create` | Create task directory |
+| `python3 ./bwflow/scripts/task.py init-context` | Initialize jsonl files |
+| `python3 ./bwflow/scripts/task.py add-context` | Add blueprint/spec/context file to jsonl |
+| `python3 ./bwflow/scripts/task.py start` | Set current task |
+| `python3 ./bwflow/scripts/task.py finish` | Clear current task |
+| `python3 ./bwflow/scripts/task.py archive` | Archive completed task |
 
 ### Sub Agents `[AI]`
 
 | Agent | Purpose | Hook Injection |
 |-------|---------|----------------|
-| research | Analyze codebase | No (reads directly) |
+| research | Analyze codebase + blueprints | No (reads directly) |
 | implement | Write code | Yes (implement.jsonl) |
 | check | Review & fix | Yes (check.jsonl) |
 | debug | Fix specific issues | Yes (debug.jsonl) |
 
 ---
 
-## Key Principle
+## Key Principles
+
+> **Blueprint answers "Why?", Spec answers "How?"**
 
 > **Code-spec context is injected, not remembered.**
 >
-> The Task Workflow ensures agents receive relevant code-spec context automatically.
+> The Task Workflow ensures agents receive relevant blueprint and code-spec context automatically.
 > This is more reliable than hoping the AI "remembers" conventions.
+
+> **Read Blueprint first, then Spec.**
+>
+> Understanding architecture intent (why) before implementation details (how) leads to better design decisions.

@@ -2,7 +2,7 @@
 """
 Trellis configuration reader.
 
-Reads settings from .trellis/config.yaml with sensible defaults.
+Reads settings from bwflow/config.yaml with sensible defaults.
 """
 
 from __future__ import annotations
@@ -176,7 +176,7 @@ def is_monorepo(repo_root: Path | None = None) -> bool:
 
 
 def get_spec_base(package: str | None = None, repo_root: Path | None = None) -> str:
-    """Get the spec directory base path relative to .trellis/.
+    """Get the spec directory base path relative to bwflow/.
 
     Single-repo: returns "spec"
     Monorepo with package: returns "spec/<package>"

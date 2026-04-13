@@ -29,20 +29,20 @@ Operations in this document are categorized as:
 First, read the workflow guide to understand the development process:
 
 ```bash
-cat .trellis/workflow.md  # Development process, conventions, and quick start guide
+cat bwflow/workflow.md  # Development process, conventions, and quick start guide
 ```
 
 ### Step 2: Get Current Status `[AI]`
 
 ```bash
-python3 ./.trellis/scripts/get_context.py
+python3 ./bwflow/scripts/get_context.py
 ```
 
 ### Step 3: Read Project Guidelines `[AI]`
 
 ```bash
-python3 ./.trellis/scripts/get_context.py --mode packages  # Discover available spec layers
-cat .trellis/spec/guides/index.md    # Thinking guides
+python3 ./bwflow/scripts/get_context.py --mode packages  # Discover available spec layers
+cat bwflow/spec/guides/index.md    # Thinking guides
 ```
 
 ### Step 4: Ask User for Requirements
@@ -67,7 +67,7 @@ Use when:
 - Unclear scope that needs research
 
 ```bash
-python3 ./.trellis/scripts/multi_agent/plan.py \
+python3 ./bwflow/scripts/multi_agent/plan.py \
   --name "<feature-name>" \
   --type "<backend|frontend|fullstack>" \
   --requirement "<user requirement description>"
@@ -83,7 +83,7 @@ Plan Agent will:
 After plan.py completes, start the worktree agent:
 
 ```bash
-python3 ./.trellis/scripts/multi_agent/start.py "$TASK_DIR"
+python3 ./bwflow/scripts/multi_agent/start.py "$TASK_DIR"
 ```
 
 ### Option B: Manual Configuration (For simple/clear features) `[AI]`
@@ -97,25 +97,25 @@ Use when:
 
 ```bash
 # title is task description, --slug for task directory name
-TASK_DIR=$(python3 ./.trellis/scripts/task.py create "<title>" --slug <task-name>)
+TASK_DIR=$(python3 ./bwflow/scripts/task.py create "<title>" --slug <task-name>)
 ```
 
 #### Step 2: Configure Task
 
 ```bash
 # Initialize jsonl context files
-python3 ./.trellis/scripts/task.py init-context "$TASK_DIR" <dev_type>
+python3 ./bwflow/scripts/task.py init-context "$TASK_DIR" <dev_type>
 
 # Set branch and scope
-python3 ./.trellis/scripts/task.py set-branch "$TASK_DIR" feature/<name>
-python3 ./.trellis/scripts/task.py set-scope "$TASK_DIR" <scope>
+python3 ./bwflow/scripts/task.py set-branch "$TASK_DIR" feature/<name>
+python3 ./bwflow/scripts/task.py set-scope "$TASK_DIR" <scope>
 ```
 
 #### Step 3: Add Context (optional: use research agent)
 
 ```bash
-python3 ./.trellis/scripts/task.py add-context "$TASK_DIR" implement "<path>" "<reason>"
-python3 ./.trellis/scripts/task.py add-context "$TASK_DIR" check "<path>" "<reason>"
+python3 ./bwflow/scripts/task.py add-context "$TASK_DIR" implement "<path>" "<reason>"
+python3 ./bwflow/scripts/task.py add-context "$TASK_DIR" check "<path>" "<reason>"
 ```
 
 #### Step 4: Create prd.md
@@ -135,8 +135,8 @@ EOF
 #### Step 5: Validate and Start
 
 ```bash
-python3 ./.trellis/scripts/task.py validate "$TASK_DIR"
-python3 ./.trellis/scripts/multi_agent/start.py "$TASK_DIR"
+python3 ./bwflow/scripts/task.py validate "$TASK_DIR"
+python3 ./bwflow/scripts/multi_agent/start.py "$TASK_DIR"
 ```
 
 ---
@@ -165,10 +165,10 @@ The following slash commands are for users (not AI):
 Tell the user they can use these commands to monitor:
 
 ```bash
-python3 ./.trellis/scripts/multi_agent/status.py                    # Overview
-python3 ./.trellis/scripts/multi_agent/status.py --log <name>       # View log
-python3 ./.trellis/scripts/multi_agent/status.py --watch <name>     # Real-time monitoring
-python3 ./.trellis/scripts/multi_agent/cleanup.py <branch>          # Cleanup worktree
+python3 ./bwflow/scripts/multi_agent/status.py                    # Overview
+python3 ./bwflow/scripts/multi_agent/status.py --log <name>       # View log
+python3 ./bwflow/scripts/multi_agent/status.py --watch <name>     # Real-time monitoring
+python3 ./bwflow/scripts/multi_agent/cleanup.py <branch>          # Cleanup worktree
 ```
 
 ---

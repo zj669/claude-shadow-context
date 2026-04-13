@@ -204,7 +204,7 @@ def main() -> int:
     print(f"  ls -la {task_dir}")
     print()
     print(f"{Colors.YELLOW}After completion, run:{Colors.NC}")
-    print(f"  python3 ./.trellis/scripts/multi_agent/start.py {task_dir}")
+    print(f"  python3 ./bwflow/scripts/multi_agent/start.py {task_dir}")
 
     return 0
 

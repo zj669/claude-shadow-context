@@ -11,12 +11,30 @@ Guide AI through collaborative requirements discovery **before implementation**,
 
 ## When to Use
 
-Triggered from `/trellis:start` when the user describes a development task, especially when:
+Triggered from `/bw start` when the user describes a development task, especially when:
 
 * requirements are unclear or evolving
 * there are multiple valid implementation paths
 * trade-offs matter (UX, reliability, maintainability, cost, performance)
 * the user might not know the best options up front
+
+---
+
+## Blueprint + Spec Integration
+
+Before brainstorming, understand the **two-layer context**:
+
+| Layer | Answers | Where |
+|-------|---------|-------|
+| **Blueprint** | "Why?" - Architecture intent, design decisions | `bwflow/blueprint/` |
+| **Spec** | "How?" - Coding standards, patterns | `bwflow/spec/` |
+
+**Read existing blueprints first** to understand current architecture before proposing changes:
+
+```bash
+cat bwflow/blueprint/README.md
+cat bwflow/blueprint/<module>/README.md
+```
 
 ---
 
@@ -26,7 +44,7 @@ Triggered from `/trellis:start` when the user describes a development task, espe
    Always ensure a task exists at the start so the user's ideas are recorded immediately.
 
 2. **Action before asking**
-   If you can derive the answer from repo code, docs, configs, conventions, or quick research — do that first.
+   If you can derive the answer from repo code, docs, blueprints, configs, conventions, or quick research — do that first.
 
 3. **One question per message**
    Never overwhelm the user with a list of questions. Ask one, update PRD, repeat.
@@ -46,18 +64,25 @@ Triggered from `/trellis:start` when the user describes a development task, espe
 
 ---
 
-## Step 0: Ensure Task Exists (ALWAYS)
+## Step 0: Ensure Task Exists + Read Blueprints (ALWAYS)
 
-Before any Q&A, ensure a task exists. If none exists, create one immediately.
+Before any Q&A:
 
-* Use a **temporary working title** derived from the user's message.
-* It's OK if the title is imperfect — refine later in PRD.
+1. **Create task** if none exists:
 
 ```bash
-TASK_DIR=$(python3 ./.trellis/scripts/task.py create "brainstorm: <short goal>" --slug <auto>)
+TASK_DIR=$(python3 ./bwflow/scripts/task.py create "brainstorm: <short goal>" --slug <auto>)
 ```
 
-Create/seed `prd.md` immediately with what you know:
+2. **Read existing blueprints** to understand current architecture:
+
+```bash
+cat bwflow/blueprint/README.md
+# If task is about a specific module:
+cat bwflow/blueprint/<module>/README.md
+```
+
+3. **Seed PRD** with what you know:
 
 ```markdown
 # brainstorm: <short goal>
@@ -69,7 +94,11 @@ Create/seed `prd.md` immediately with what you know:
 ## What I already know
 
 * <facts from user message>
-* <facts discovered from repo/docs>
+* <facts discovered from repo/docs/blueprints>
+
+## Existing Architecture (from Blueprint)
+
+* <key design decisions from existing blueprints>
 
 ## Assumptions (temporary)
 
@@ -91,6 +120,7 @@ Create/seed `prd.md` immediately with what you know:
 
 * Tests added/updated (unit/integration where appropriate)
 * Lint / typecheck / CI green
+* Blueprint updated if architecture changes
 * Docs/notes updated if behavior changes
 * Rollout/rollback considered if risky
 
@@ -117,6 +147,12 @@ Before asking questions like "what does the code look like?", gather context you
 * Check configs, scripts, existing command definitions
 * Note any constraints (runtime, dependency policy, build tooling)
 
+### Blueprint checklist
+
+* Read related blueprints to understand current architecture
+* Identify design decisions that constrain the solution
+* Note any planned extensions that should be preserved
+
 ### Documentation checklist
 
 * Look for existing PRDs/specs/templates
@@ -125,6 +161,7 @@ Before asking questions like "what does the code look like?", gather context you
 Write findings into PRD:
 
 * Add to `What I already know`
+* Add to `Existing Architecture (from Blueprint)`
 * Add constraints/links to `Technical Notes`
 
 ---
@@ -134,8 +171,8 @@ Write findings into PRD:
 | Complexity   | Criteria                                               | Action                                      |
 | ------------ | ------------------------------------------------------ | ------------------------------------------- |
 | **Trivial**  | Single-line fix, typo, obvious change                  | Skip brainstorm, implement directly         |
-| **Simple**   | Clear goal, 1–2 files, scope well-defined              | Ask 1 confirm question, then implement      |
-| **Moderate** | Multiple files, some ambiguity                         | Light brainstorm (2–3 high-value questions) |
+| **Simple**   | Clear goal, 1–2 files, scope well-defined             | Ask 1 confirm question, then implement      |
+| **Moderate** | Multiple files, some ambiguity                        | Light brainstorm (2–3 high-value questions) |
 | **Complex**  | Vague goal, architectural choices, multiple approaches | Full brainstorm                             |
 
 > Note: Task already exists from Step 0. Classification only affects depth of brainstorming.
@@ -151,6 +188,7 @@ Before asking ANY question, run the following gate:
 If answer is available via:
 
 * repo inspection (code/config)
+* blueprints (architecture intent)
 * docs/specs/conventions
 * quick market/OSS research
 
@@ -170,7 +208,7 @@ Examples:
 
 * **Blocking**: cannot proceed without user input
 * **Preference**: multiple valid choices, depends on product/UX/risk preference
-* **Derivable**: should be answered by inspection/research
+* **Derivable**: should be answered by inspection/research/blueprints
 
 → Only ask **Blocking** or **Preference**.
 
@@ -189,7 +227,8 @@ Examples:
 1. Identify 2–4 comparable tools/patterns
 2. Summarize common conventions and why they exist
 3. Map conventions onto our repo constraints
-4. Produce **2–3 feasible approaches** for our project
+4. Consider impact on existing blueprints
+5. Produce **2–3 feasible approaches** for our project
 
 ### Research output format (PRD)
 
@@ -203,7 +242,7 @@ Add a section in PRD (either within Technical Notes or as its own):
 * ...
 * ...
 
-### Constraints from our repo/project
+### Constraints from our repo/blueprints
 
 * ...
 
@@ -214,12 +253,14 @@ Add a section in PRD (either within Technical Notes or as its own):
 * How it works:
 * Pros:
 * Cons:
+* Blueprint impact: <does this change architecture?>
 
 **Approach B: <name>**
 
 * How it works:
 * Pros:
 * Cons:
+* Blueprint impact: <does this change architecture?>
 
 **Approach C: <name>** (optional)
 
@@ -324,12 +365,14 @@ Based on current information, here are 2–3 feasible approaches:
 * How:
 * Pros:
 * Cons:
+* Blueprint update needed: <yes/no>
 
 **Approach B: <name>**
 
 * How:
 * Pros:
 * Cons:
+* Blueprint update needed: <yes/no>
 
 Which direction do you prefer?
 ```
@@ -341,6 +384,7 @@ Record the outcome in PRD as an ADR-lite section:
 
 **Context**: Why this decision was needed
 **Decision**: Which approach was chosen
+**Blueprint Impact**: What needs to be updated in blueprints
 **Consequences**: Trade-offs, risks, potential future improvements
 ```
 
@@ -367,6 +411,9 @@ Here's my understanding of the complete requirements:
 * [ ] ...
 * [ ] ...
 
+**Blueprint Updates Needed**:
+* [ ] Update bwflow/blueprint/<module>/README.md
+
 **Definition of Done**:
 
 * ...
@@ -382,7 +429,7 @@ Here's my understanding of the complete requirements:
 
 * PR1: <scaffolding + tests + minimal plumbing>
 * PR2: <core behavior>
-* PR3: <edge cases + docs + cleanup>
+* PR3: <edge cases + docs + blueprint update + cleanup>
 
 Does this look correct? If yes, I'll proceed with implementation.
 ```
@@ -393,11 +440,11 @@ For complex tasks with multiple independent work items, create subtasks:
 
 ```bash
 # Create child tasks
-CHILD1=$(python3 ./.trellis/scripts/task.py create "Child task 1" --slug child1 --parent "$TASK_DIR")
-CHILD2=$(python3 ./.trellis/scripts/task.py create "Child task 2" --slug child2 --parent "$TASK_DIR")
+CHILD1=$(python3 ./bwflow/scripts/task.py create "Child task 1" --slug child1 --parent "$TASK_DIR")
+CHILD2=$(python3 ./bwflow/scripts/task.py create "Child task 2" --slug child2 --parent "$TASK_DIR")
 
 # Or link existing tasks
-python3 ./.trellis/scripts/task.py add-subtask "$TASK_DIR" "$CHILD_DIR"
+python3 ./bwflow/scripts/task.py add-subtask "$TASK_DIR" "$CHILD_DIR"
 ```
 
 ---
@@ -424,6 +471,11 @@ python3 ./.trellis/scripts/task.py add-subtask "$TASK_DIR" "$CHILD_DIR"
 ## Definition of Done
 
 * ...
+* Blueprint updated if architecture changed
+
+## Blueprint Updates
+
+* <list of blueprints to update>
 
 ## Technical Approach
 
@@ -431,7 +483,7 @@ python3 ./.trellis/scripts/task.py add-subtask "$TASK_DIR" "$CHILD_DIR"
 
 ## Decision (ADR-lite)
 
-Context / Decision / Consequences
+Context / Decision / Blueprint Impact / Consequences
 
 ## Out of Scope
 
@@ -448,6 +500,7 @@ Context / Decision / Consequences
 
 * Asking user for code/context that can be derived from repo
 * Asking user to choose an approach before presenting concrete options
+* Ignoring existing blueprints when proposing solutions
 * Meta questions about whether to research
 * Staying narrowly on the initial request without considering evolution/edges
 * Letting brainstorming drift without updating PRD
@@ -460,28 +513,26 @@ After brainstorm completes (Step 8 confirmation approved), the flow continues to
 
 ```text
 Brainstorm
-  Step 0: Create task directory + seed PRD
+  Step 0: Create task + Read blueprints + seed PRD
   Step 1–7: Discover requirements, research, converge
   Step 8: Final confirmation → user approves
   ↓
 Task Workflow Phase 2 (Prepare for Implementation)
-  Code-Spec Depth Check (if applicable)
+  Blueprint + Code-Spec Depth Check (if applicable)
   → Research codebase (based on confirmed PRD)
-  → Configure code-spec context (jsonl files)
+  → Configure blueprint + code-spec context (jsonl files)
   → Activate task
   ↓
 Task Workflow Phase 3 (Execute)
   Implement → Check → Complete
 ```
 
-The task directory and PRD already exist from brainstorm, so Phase 1 of the Task Workflow is skipped entirely.
-
 ---
 
-## Related Commands
+## Core Principles
 
-| Command | When to Use |
-|---------|-------------|
-| `/trellis:start` | Entry point that triggers brainstorm |
-| `/trellis:finish-work` | After implementation is complete |
-| `/trellis:update-spec` | If new patterns emerge during work |
+> **Blueprint answers "Why?", Spec answers "How?"**
+
+> **Read existing architecture before proposing changes.**
+
+> **Document architectural decisions in blueprints.**

@@ -6,7 +6,7 @@ Import this module before importing from common/:
 
 This adds the parent scripts/ directory to sys.path so that
 `from common.xxx import yyy` works when running scripts directly
-via `python3 .trellis/scripts/multi_agent/some_script.py`.
+via `python3 bwflow/scripts/multi_agent/some_script.py`.
 """
 
 import sys

@@ -79,7 +79,7 @@ def cmd_start(args: argparse.Namespace) -> int:
 
     if not full_path.is_dir():
         print(colored(f"Error: Task not found: {task_input}", Colors.RED))
-        print("Hint: Use task name (e.g., 'my-task') or full path (e.g., '.trellis/tasks/01-31-my-task')")
+        print("Hint: Use task name (e.g., 'my-task') or full path (e.g., 'bwflow/tasks/01-31-my-task')")
         return 1
 
     # Convert to relative path for storage
@@ -297,12 +297,12 @@ List options:
 Examples:
   python3 task.py create "Add login feature" --slug add-login
   python3 task.py create "Add login feature" --slug add-login --package cli
-  python3 task.py create "Child task" --slug child --parent .trellis/tasks/01-21-parent
-  python3 task.py init-context .trellis/tasks/01-21-add-login backend
-  python3 task.py init-context .trellis/tasks/01-21-add-login backend --package cli
-  python3 task.py add-context <dir> implement .trellis/spec/cli/backend/auth.md "Auth guidelines"
+  python3 task.py create "Child task" --slug child --parent bwflow/tasks/01-21-parent
+  python3 task.py init-context bwflow/tasks/01-21-add-login backend
+  python3 task.py init-context bwflow/tasks/01-21-add-login backend --package cli
+  python3 task.py add-context <dir> implement bwflow/spec/backend/auth.md "Auth guidelines"
   python3 task.py set-branch <dir> task/add-login
-  python3 task.py start .trellis/tasks/01-21-add-login
+  python3 task.py start bwflow/tasks/01-21-add-login
   python3 task.py create-pr                          # Uses current task
   python3 task.py create-pr <dir> --dry-run          # Preview without changes
   python3 task.py finish

@@ -107,7 +107,7 @@ def _get_task_status(trellis_dir: Path) -> str:
     # Resolve task directory
     task_dir = _resolve_task_dir(trellis_dir, task_ref)
     if not task_dir.is_dir():
-        return f"Status: STALE POINTER\nTask: {task_ref}\nNext: Task directory not found. Run: python3 ./bwflow/scripts/task.py finish"
+        return f"Status: STALE POINTER\nTask: {task_ref}\nNext: Task directory not found. Run: python3 bwflow/scripts/task.py finish"
 
     # Read task.json
     task_json_path = task_dir / "task.json"
@@ -122,7 +122,7 @@ def _get_task_status(trellis_dir: Path) -> str:
     task_status = task_data.get("status", "unknown")
 
     if task_status == "completed":
-        return f"Status: COMPLETED\nTask: {task_title}\nNext: Archive with `python3 ./bwflow/scripts/task.py archive {task_dir.name}` or start a new task"
+        return f"Status: COMPLETED\nTask: {task_title}\nNext: Archive with `python3 bwflow/scripts/task.py archive {task_dir.name}` or start a new task"
 
     # Check if context is configured (jsonl files exist and non-empty)
     has_context = False

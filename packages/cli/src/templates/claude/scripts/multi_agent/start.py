@@ -3,7 +3,7 @@
 Multi-Agent Pipeline: Start Worktree Agent.
 
 Usage: python3 start.py <task-dir>
-Example: python3 start.py .trellis/tasks/01-21-my-task
+Example: python3 start.py bwflow/tasks/01-21-my-task
 
 This script:
 1. Creates worktree (if not exists) with dependency install
@@ -16,7 +16,7 @@ Prerequisites:
     - task.json must exist with 'branch' field
     - agents/dispatch.md must exist (in .claude/, .cursor/, .iflow/, or .opencode/)
 
-Configuration: .trellis/worktree.yaml
+Configuration: bwflow/worktree.yaml
 """
 
 from __future__ import annotations
@@ -448,7 +448,7 @@ def main() -> int:
     # Also remind the model to follow its agent definition for better cross-model compatibility
     cli_cmd = adapter.build_run_command(
         agent="dispatch",
-        prompt="Follow your agent instructions to execute the task workflow. Start by reading .trellis/.current-task to get the task directory, then execute each action in task.json next_action array in order.",
+        prompt="Follow your agent instructions to execute the task workflow. Start by reading bwflow/.current-task to get the task directory, then execute each action in task.json next_action array in order.",
         session_id=session_id if adapter.supports_session_id_on_create else None,
         skip_permissions=True,
         verbose=True,

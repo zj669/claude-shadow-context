@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { getClaudeTemplatesDir } from "../templates/index.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// Trellis 命令映射到 bwflow
+// Trellis 命令映射到 bwflow (精简版)
 const COMMAND_MAP = {
     "trellis/start": "start",
     "trellis/before-dev": "before-dev",
@@ -17,12 +17,7 @@ const COMMAND_MAP = {
     "trellis/record-session": "record",
     "trellis/brainstorm": "brainstorm",
     "trellis/check": "check",
-    "trellis/check-cross-layer": "check-cross-layer",
-    "trellis/create-command": "create-command",
-    "trellis/integrate-skill": "integrate-skill",
-    "trellis/onboard": "onboard",
     "trellis/parallel": "parallel",
-    "trellis/break-loop": "break-loop",
     "trellis/update-spec": "update-spec",
 };
 /**
@@ -72,8 +67,10 @@ export async function initCommand(options) {
             const srcCmdDir = join(srcCommandsDir, cmdDir);
             if (!fs.statSync(srcCmdDir).isDirectory())
                 continue;
-            // 映射命令名
-            const mappedName = COMMAND_MAP[`trellis/${cmdDir}`] || cmdDir;
+            // 只复制映射中存在的命令
+            const mappedName = COMMAND_MAP[`trellis/${cmdDir}`];
+            if (!mappedName)
+                continue;
             const destCmdDir = join(destCommandsDir, mappedName);
             fs.ensureDirSync(destCmdDir);
             const files = fs.readdirSync(srcCmdDir);
@@ -94,7 +91,7 @@ export async function initCommand(options) {
     if (fs.existsSync(srcScriptsDir)) {
         copyDirectoryRecursive(srcScriptsDir, destScriptsDir, cwd);
     }
-    // 复制 hooks 模板到 bwflow/hooks/
+    // 复制 hooks 模板
     const srcHooksDir = join(templatesDir, "hooks");
     const destHooksDir = join(bwflowDir, "hooks");
     console.log(chalk.cyan("\n📁 复制 Hooks 模板:\n"));
@@ -254,101 +251,7 @@ async function syncToClaudeCode(cwd, bwflowDir) {
         }
         console.log(chalk.gray(`  ✓ commands → .claude/commands/bwflow/`));
     }
-    // 2. 同步 hooks 到 .claude/hooks/
-    const srcHooksDir = join(bwflowDir, "hooks");
-    const destHooksDir = join(cwd, ".claude", "hooks");
-    if (fs.existsSync(srcHooksDir)) {
-        fs.ensureDirSync(destHooksDir);
-        const hooks = fs.readdirSync(srcHooksDir);
-        for (const hook of hooks) {
-            if (hook.endsWith(".py")) {
-                const srcFile = join(srcHooksDir, hook);
-                const destFile = join(destHooksDir, hook);
-                fs.copySync(srcFile, destFile, { overwrite: true });
-            }
-        }
-        console.log(chalk.gray(`  ✓ hooks → .claude/hooks/`));
-    }
-    // 3. 创建 .claude/settings.json
-    const settingsContent = {
-        statusLine: {
-            type: "command",
-            command: "python3 .claude/hooks/statusline.py"
-        },
-        hooks: {
-            SessionStart: [
-                {
-                    matcher: "startup",
-                    hooks: [
-                        {
-                            type: "command",
-                            command: "python3 .claude/hooks/session-start.py",
-                            timeout: 10
-                        }
-                    ]
-                },
-                {
-                    matcher: "clear",
-                    hooks: [
-                        {
-                            type: "command",
-                            command: "python3 .claude/hooks/session-start.py",
-                            timeout: 10
-                        }
-                    ]
-                },
-                {
-                    matcher: "compact",
-                    hooks: [
-                        {
-                            type: "command",
-                            command: "python3 .claude/hooks/session-start.py",
-                            timeout: 10
-                        }
-                    ]
-                }
-            ],
-            PreToolUse: [
-                {
-                    matcher: "Task",
-                    hooks: [
-                        {
-                            type: "command",
-                            command: "python3 .claude/hooks/inject-subagent-context.py",
-                            timeout: 30
-                        }
-                    ]
-                },
-                {
-                    matcher: "Agent",
-                    hooks: [
-                        {
-                            type: "command",
-                            command: "python3 .claude/hooks/inject-subagent-context.py",
-                            timeout: 30
-                        }
-                    ]
-                }
-            ],
-            SubagentStop: [
-                {
-                    matcher: "check",
-                    hooks: [
-                        {
-                            type: "command",
-                            command: "python3 .claude/hooks/ralph-loop.py",
-                            timeout: 10
-                        }
-                    ]
-                }
-            ]
-        },
-        enabledPlugins: {}
-    };
-    const settingsFile = join(cwd, ".claude", "settings.json");
-    fs.writeFileSync(settingsFile, JSON.stringify(settingsContent, null, 2), "utf-8");
-    console.log(chalk.gray(`  ✓ settings.json → .claude/settings.json`));
-    // 4. 创建 README
+    // 2. 创建 README
     const readmeContent = `# bwflow Commands
 
 Claude Code 集成 bwflow 协议命令。
@@ -368,12 +271,7 @@ Claude Code 集成 bwflow 协议命令。
 |------|------|
 | \`/bw brainstorm\` | 需求探索 |
 | \`/bw check\` | 通用检查 |
-| \`/bw check-cross-layer\` | 跨层检查 |
-| \`/bw create-command\` | 创建命令 |
-| \`/bw integrate-skill\` | 集成技能 |
-| \`/bw onboard\` | 新人引导 |
 | \`/bw parallel\` | 并行任务 |
-| \`/bw break-loop\` | 跳出循环 |
 | \`/bw update-spec\` | 更新规范 |
 
 ## 开发流程
