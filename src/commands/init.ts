@@ -11,13 +11,14 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// bwflow 核心目录（dist/commands/ -> dist -> packages/cli -> packages -> 项目根 -> bwflow）
-const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", "bwflow");
+// bwflow 核心目录（dist/commands/ -> dist -> 项目根 -> bwflow）
+const BWFLOW_SOURCE = join(__dirname, "..", "..", "bwflow");
 // 工具模板目录（dist/commands/ -> dist/templates/）
 const TEMPLATES_DIR = join(__dirname, "..", "templates");
 
 interface InitOptions {
   type?: string;
+  user?: string;
   yes?: boolean;
   force?: boolean;
 }
@@ -44,7 +45,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
   console.log(chalk.gray(`初始化类型: ${initType}\n`));
 
   // 1. 复制 bwflow 核心到 .bwflow/
-  initBwflow(cwd);
+  initBwflow(cwd, options.user);
 
   // 2. 复制工具模板到对应目录
   initToolIntegration(cwd, initType);
@@ -58,7 +59,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
 /**
  * 复制 bwflow 核心到 .bwflow/
  */
-function initBwflow(cwd: string): void {
+function initBwflow(cwd: string, userName?: string): void {
   console.log(chalk.cyan("📦 初始化 bwflow 核心...\n"));
 
   // 检查 bwflow 源目录
@@ -73,6 +74,24 @@ function initBwflow(cwd: string): void {
     excludeDirs: ["__pycache__", ".git"],
     excludeFiles: ["README.md"], // 不复制 bwflow 自己的 README
   });
+
+  // 如果提供了用户名，更新 config.yaml
+  if (userName) {
+    const configPath = join(destDir, "config.yaml");
+    if (fs.existsSync(configPath)) {
+      try {
+        const configContent = fs.readFileSync(configPath, "utf-8");
+        const updatedConfig = configContent.replace(
+          /developer:\s*\n\s*name:\s*.*/,
+          `developer:\n  name: ${userName}`
+        );
+        fs.writeFileSync(configPath, updatedConfig, "utf-8");
+        console.log(chalk.gray(`  ✓ 设置开发者: ${userName}\n`));
+      } catch (err) {
+        console.log(chalk.yellow(`  ⚠️  无法更新开发者配置\n`));
+      }
+    }
+  }
 }
 
 /**
@@ -101,31 +120,6 @@ function initToolIntegration(cwd: string, type: string): void {
     excludeDirs: ["__pycache__"],
   });
 
-  // Kiro 特殊处理
-  if (type === "kiro") {
-    // 1. 创建 common 软链接
-    const commonSrc = join(cwd, ".bwflow", "scripts", "common");
-    const commonDest = join(destDir, "scripts", "common");
-    if (fs.existsSync(commonSrc)) {
-      try {
-        fs.symlinkSync(commonSrc, commonDest, "dir");
-        console.log(chalk.gray(`  ✓ 创建软链接: scripts/common`));
-      } catch (err) {
-        // Windows 回退到复制
-        fs.copySync(commonSrc, commonDest);
-        console.log(chalk.gray(`  ✓ 复制目录: scripts/common`));
-      }
-    }
-
-    // 2. 复制 spec 到 steering
-    const specSource = join(cwd, ".bwflow", "spec");
-    const steeringDest = join(destDir, "steering");
-    if (fs.existsSync(specSource)) {
-      fs.copySync(specSource, steeringDest);
-      console.log(chalk.gray(`  ✓ 复制规范文件到 Steering 系统`));
-    }
-  }
-
   // 设置脚本执行权限（仅 Unix 系统）
   if (process.platform !== "win32") {
     const hooksDir = join(destDir, "hooks");
@@ -141,19 +135,16 @@ function initToolIntegration(cwd: string, type: string): void {
       }
     }
 
-    // Kiro: 设置 scripts 目录权限
-    if (type === "kiro") {
-      const scriptsDir = join(destDir, "scripts");
-      if (fs.existsSync(scriptsDir)) {
-        const files = fs.readdirSync(scriptsDir);
-        for (const file of files) {
-          if (file.endsWith(".py")) {
-            const filePath = join(scriptsDir, file);
-            try {
-              fs.chmodSync(filePath, 0o755);
-            } catch {
-              // 忽略权限设置失败
-            }
+    const scriptsDir = join(destDir, "scripts");
+    if (fs.existsSync(scriptsDir)) {
+      const files = fs.readdirSync(scriptsDir);
+      for (const file of files) {
+        if (file.endsWith(".py")) {
+          const filePath = join(scriptsDir, file);
+          try {
+            fs.chmodSync(filePath, 0o755);
+          } catch {
+            // 忽略权限设置失败
           }
         }
       }

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Spec 任务质量检查",
+  "description": "在 Spec 任务完成后，自动运行代码检查、测试验证和蓝图对齐检查",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "python3 .kiro/scripts/ralph-loop.py"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Spec 任务上下文注入",
+  "description": "在 Spec 任务开始前，自动注入任务相关的规范、PRD 和技术设计文档到 Agent 上下文",
+  "version": "1",
+  "when": {
+    "type": "preTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "python3 .kiro/scripts/inject-subagent-context.py"
+  }
+}

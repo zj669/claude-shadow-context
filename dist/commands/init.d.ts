@@ -4,6 +4,7 @@
  */
 interface InitOptions {
     type?: string;
+    user?: string;
     yes?: boolean;
     force?: boolean;
 }

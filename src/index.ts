@@ -22,6 +22,7 @@ program
   .command("init")
   .description("初始化 bwflow 结构到当前项目")
   .requiredOption("-t, --type <type>", "初始化类型 (claude/cursor/kiro)")
+  .option("-u, --user <name>", "开发者名称")
   .option("-y, --yes", "跳过确认提示")
   .option("-f, --force", "强制覆盖已存在的文件")
   .action(async (options) => {
