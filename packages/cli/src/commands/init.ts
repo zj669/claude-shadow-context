@@ -34,9 +34,9 @@ export async function initCommand(options: InitOptions): Promise<void> {
   console.log(chalk.gray(`目标目录: ${cwd}`));
 
   // 确定初始化类型
-  const initType = options.type || "claude";
+  const initType = options.type!;
   if (!SUPPORTED_TYPES.includes(initType)) {
-    console.log(chalk.red(`不支持的类型: ${initType}`));
+    console.log(chalk.red(`\n❌ 不支持的类型: ${initType}`));
     console.log(chalk.gray(`支持的类型: ${SUPPORTED_TYPES.join(", ")}\n`));
     return;
   }
