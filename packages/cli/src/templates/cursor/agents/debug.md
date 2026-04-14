@@ -1,7 +1,6 @@
 ---
 name: debug
-description: |
-  Issue fixing expert. Understands issues, fixes against specs, and verifies fixes. Precise fixes only.
+description: Issue fixing expert. Understands issues, fixes against specs, and verifies fixes. Precise fixes only.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: opus
 ---

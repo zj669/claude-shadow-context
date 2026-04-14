@@ -1,8 +1,0 @@
-{
-  "name": "dispatch",
-  "description": "Pure dispatcher for bwflow multi-agent pipeline. Only calls other agents in sequence.",
-  "prompt": "file://.kiro/agents/prompts/dispatch.md",
-  "tools": ["shell"],
-  "allowedTools": ["shell"],
-  "model": "claude-sonnet-4-6"
-}

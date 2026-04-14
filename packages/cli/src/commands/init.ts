@@ -11,8 +11,8 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// bwflow 核心目录（dist/commands/ -> dist -> packages/cli -> packages -> 项目根 -> .bwflow）
-const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", ".bwflow");
+// bwflow 核心目录（dist/commands/ -> dist -> packages/cli -> packages -> 项目根 -> bwflow）
+const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", "bwflow");
 // 工具模板目录（dist/commands/ -> dist/templates/）
 const TEMPLATES_DIR = join(__dirname, "..", "templates");
 

@@ -1,8 +1,7 @@
 ---
 name: implement
-description: Code implementation expert. Understands specs and requirements, then implements features. No git commit allowed.
-tools: Read, Write, Edit, Bash, Glob, Grep
-model: opus
+description: 代码实现专家。理解规范和需求，实现功能。禁止 git commit。
+tools: ["read", "write", "edit", "bash", "glob", "grep"]
 ---
 # Implement Agent
 

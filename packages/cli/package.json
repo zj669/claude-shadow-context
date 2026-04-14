@@ -7,8 +7,9 @@
     "bw": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc && npm run copy-templates",
+    "build": "tsc && npm run copy-templates && npm run clean-legacy",
     "copy-templates": "cp -r src/templates dist/",
+    "clean-legacy": "find dist/templates -type d -name 'bwflow' -exec rm -rf {} + 2>/dev/null || true",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },

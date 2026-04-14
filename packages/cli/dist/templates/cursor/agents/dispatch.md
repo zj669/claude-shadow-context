@@ -1,7 +1,6 @@
 ---
 name: dispatch
-description: |
-  Multi-Agent Pipeline main dispatcher. Pure dispatcher. Only responsible for calling subagents and scripts in phase order.
+description: Multi-Agent Pipeline main dispatcher. Pure dispatcher. Only responsible for calling subagents and scripts in phase order.
 tools: Read, Bash
 model: opus
 ---

@@ -1,7 +1,6 @@
 ---
 name: research
-description: |
-  Code and tech search expert. Pure research, no code modifications. Finds files, patterns, and tech solutions.
+description: Code and tech search expert. Pure research, no code modifications. Finds files, patterns, and tech solutions.
 tools: Read, Glob, Grep
 model: opus
 ---

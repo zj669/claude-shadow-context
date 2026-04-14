@@ -8,8 +8,8 @@ import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// bwflow 核心目录（dist/commands/ -> dist -> packages/cli -> packages -> 项目根 -> .bwflow）
-const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", ".bwflow");
+// bwflow 核心目录（dist/commands/ -> dist -> packages/cli -> packages -> 项目根 -> bwflow）
+const BWFLOW_SOURCE = join(__dirname, "..", "..", "..", "..", "bwflow");
 // 工具模板目录（dist/commands/ -> dist/templates/）
 const TEMPLATES_DIR = join(__dirname, "..", "templates");
 const SUPPORTED_TYPES = ["claude", "cursor", "kiro"];
@@ -21,9 +21,9 @@ export async function initCommand(options) {
     console.log(chalk.blue("\n🔷 bwflow 初始化\n"));
     console.log(chalk.gray(`目标目录: ${cwd}`));
     // 确定初始化类型
-    const initType = options.type || "claude";
+    const initType = options.type;
     if (!SUPPORTED_TYPES.includes(initType)) {
-        console.log(chalk.red(`不支持的类型: ${initType}`));
+        console.log(chalk.red(`\n❌ 不支持的类型: ${initType}`));
         console.log(chalk.gray(`支持的类型: ${SUPPORTED_TYPES.join(", ")}\n`));
         return;
     }

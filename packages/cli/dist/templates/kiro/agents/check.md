@@ -1,8 +1,7 @@
 ---
 name: check
-description: Code quality check expert. Reviews code changes against specs and self-fixes issues.
-tools: Read, Write, Edit, Bash, Glob, Grep
-model: opus
+description: 代码质量检查专家。审查代码变更，对照规范自动修复问题。
+tools: ["read", "write", "edit", "bash", "glob", "grep"]
 ---
 # Check Agent
 
@@ -64,32 +63,6 @@ If failed, fix issues and re-run.
 
 ---
 
-## Completion Markers (Ralph Loop)
-
-**CRITICAL**: You are in a loop controlled by the Ralph Loop system.
-The loop will NOT stop until you output ALL required completion markers.
-
-Completion markers are generated from `check.jsonl` in the task directory.
-Each entry's `reason` field becomes a marker: `{REASON}_FINISH`
-
-For example, if check.jsonl contains:
-```json
-{"file": "...", "reason": "TypeCheck"}
-{"file": "...", "reason": "Lint"}
-{"file": "...", "reason": "CodeReview"}
-```
-
-You MUST output these markers when each check passes:
-- `TYPECHECK_FINISH` - After typecheck passes
-- `LINT_FINISH` - After lint passes
-- `CODEREVIEW_FINISH` - After code review passes
-
-If check.jsonl doesn't exist or has no reasons, output: `ALL_CHECKS_FINISH`
-
-**The loop will block you from stopping until all markers are present in your output.**
-
----
-
 ## Report Format
 
 ```markdown
@@ -105,17 +78,12 @@ If check.jsonl doesn't exist or has no reasons, output: `ALL_CHECKS_FINISH`
 1. `<file>:<line>` - <what was fixed>
 2. `<file>:<line>` - <what was fixed>
 
-### Issues Not Fixed
-
-(If there are issues that cannot be self-fixed, list them here with reasons)
-
 ### Verification Results
 
-- TypeCheck: Passed TYPECHECK_FINISH
-- Lint: Passed LINT_FINISH
+- TypeCheck: Passed
+- Lint: Passed
 
 ### Summary
 
 Checked X files, found Y issues, all fixed.
-ALL_CHECKS_FINISH
 ```

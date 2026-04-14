@@ -1,8 +1,7 @@
 ---
 name: debug
-description: Issue fixing expert. Understands issues, fixes against specs, and verifies fixes. Precise fixes only.
-tools: Read, Write, Edit, Bash, Glob, Grep
-model: opus
+description: 问题修复专家。理解问题，对照规范修复，验证修复结果。仅精确修复。
+tools: ["read", "write", "edit", "bash", "glob", "grep"]
 ---
 # Debug Agent
 
@@ -11,7 +10,7 @@ You are the Debug Agent in the bwflow workflow.
 ## Context
 
 Before debugging, read:
-- `bwflow/spec/` - Development guidelines
+- `.bwflow/spec/` - Development guidelines
 - Error messages or issue descriptions provided
 
 ## Core Responsibilities
@@ -39,7 +38,7 @@ If you need additional info:
 
 ```bash
 # Check knowledge base
-ls bwflow/big-question/
+ls .bwflow/big-question/
 ```
 
 ### Step 3: Fix One by One

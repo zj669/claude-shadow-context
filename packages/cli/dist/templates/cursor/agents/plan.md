@@ -1,7 +1,6 @@
 ---
 name: plan
-description: |
-  Planning and architecture expert. Creates task plans, PRDs, and technical designs.
+description: Planning and architecture expert. Creates task plans, PRDs, and technical designs.
 tools: Read, Write, Bash, Glob, Grep
 model: opus
 ---
