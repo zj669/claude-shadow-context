@@ -6,12 +6,19 @@
  */
 import { Command } from "commander";
 import chalk from "chalk";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { initCommand } from "./commands/init.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// 从 package.json 读取版本号
+const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 const program = new Command();
 program
     .name("bw")
     .description("bwflow - Blueprint Workflow CLI (Trellis + Blueprint Layer)")
-    .version("0.1.0");
+    .version(packageJson.version);
 // init - 初始化项目
 program
     .command("init")
