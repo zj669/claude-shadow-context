@@ -1,33 +1,59 @@
 # Quality Guidelines
 
-> Code quality standards for Python scripts and JavaScript modules.
+> **To be filled by the team**: Document your project's code quality standards and practices.
 
 ---
 
 ## Overview
 
-This project enforces quality standards adapted from the bwflow project for its hybrid Python/JavaScript architecture.
+**To be filled by the team**: Describe your quality standards.
+
+Questions to answer:
+- What tools are used for code quality (linters, formatters, type checkers)?
+- What are the quality gates before code can be merged?
+- How is code quality measured?
 
 ---
 
-## Python: TypeScript-Inspired Quality Standards
+## Code Style
 
-### Type Hints (Python 3.10+)
+**To be filled by the team**: Document code style conventions.
 
-Use modern type hints throughout:
+Questions to answer:
+- What style guide is followed?
+- How should code be formatted?
+- What naming conventions are used?
+
+---
+
+## Testing Standards
+
+**To be filled by the team**: Document testing requirements.
+
+Questions to answer:
+- What types of tests are required (unit, integration, e2e)?
+- What is the minimum test coverage requirement?
+- How should tests be structured?
+
+---
+
+## Code Review
+
+**To be filled by the team**: Document code review practices.
+
+Questions to answer:
+- What should reviewers look for?
+- What are common issues to avoid?
+- How should feedback be given?
+
+---
+
+## Examples
+
+**To be filled by the team**: Provide examples of high-quality code from your project.
 
 ```python
-# Good
-def get_tasks(status: str | None = None) -> list[dict]:
-    ...
-
-def read_json(path: Path) -> dict | None:
-    ...
-
-# Bad - old style
-from typing import Optional, List, Dict
-def get_tasks(status: Optional[str] = None) -> List[Dict]:
-    ...
+# Example: To be filled by the team
 ```
 
 ### Forbidden Patterns

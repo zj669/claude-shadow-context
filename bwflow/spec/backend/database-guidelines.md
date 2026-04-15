@@ -1,53 +1,48 @@
 # Database Guidelines
 
-> This project does not use a traditional database.
+> **To be filled by the team**: Document your project's database or state management approach.
 
 ---
 
 ## Overview
 
-`claude-shadow-context` is a Claude Code plugin that manages project context through file-based storage. All persistence uses JSON files and Markdown documents versioned in Git.
+**To be filled by the team**: Describe how your project manages persistent state.
+
+Questions to answer:
+- What database system does your project use? (PostgreSQL, MySQL, MongoDB, SQLite, file-based, etc.)
+- What ORM or query library is used? (SQLAlchemy, Prisma, raw SQL, etc.)
+- How is database access organized? (repository pattern, direct queries, etc.)
 
 ---
 
-## File-Based State Management
+## Schema Management
 
-| Data Type | Storage | Format |
-|-----------|---------|--------|
-| Task state | `.bwflow/tasks/{task-id}/task.json` | JSON |
-| Agent context | `.bwflow/tasks/{task-id}/*.jsonl` | JSON Lines |
-| Session memory | `.bwflow/workspace/{developer}/journal-N.md` | Markdown |
-| Blueprint layer | `.blueprint/` | Markdown |
-| Developer identity | `.bwflow/.developer` | Plain text |
-| Current task | `.bwflow/.current-task` | Plain text |
+**To be filled by the team**: Document how database schema is managed.
+
+Questions to answer:
+- How are migrations created and applied?
+- What naming conventions are used for tables and columns?
+- How are schema changes reviewed and deployed?
 
 ---
 
-## Task JSON Schema
+## Query Patterns
 
-Tasks are stored as individual JSON files:
+**To be filled by the team**: Document common query patterns and best practices.
 
-```json
-{
-  "title": "Task Title",
-  "status": "in_progress",
-  "created": "2026-04-12",
-  "description": "Task description",
-  "branch": "feat/task-name",
-  "current_phase": 1,
-  "next_action": [
-    { "phase": 1, "action": "implement" },
-    { "phase": 2, "action": "check" },
-    { "phase": 3, "action": "finish" }
-  ],
-  "assignee": "zj669",
-  "priority": "P1"
-}
-```
+Questions to answer:
+- What patterns should be used for common operations (CRUD, pagination, filtering)?
+- How should transactions be handled?
+- What are the performance considerations?
 
-### Read-Write Pattern
+---
+
+## Examples
+
+**To be filled by the team**: Provide examples of well-written database code from your project.
 
 ```python
+# Example: To be filled by the team
 from pathlib import Path
 import json
 

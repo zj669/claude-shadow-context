@@ -1,53 +1,49 @@
 # Error Handling
 
-> How errors are handled in Python scripts and JavaScript modules.
+> **To be filled by the team**: Document your project's error handling patterns and conventions.
 
 ---
 
 ## Overview
 
-This project uses a **top-level catch pattern** for Python scripts and **fail-closed pattern** for JavaScript hooks. Python scripts bubble errors to command handlers; JavaScript hooks silently swallow errors to avoid disrupting Claude shutdown.
+**To be filled by the team**: Describe your project's overall error handling philosophy.
+
+Questions to answer:
+- What is the general error handling strategy? (fail-fast, graceful degradation, etc.)
+- How are errors logged and monitored?
+- What error types are used in the codebase?
 
 ---
 
-## Python: Error Handling Patterns
+## Error Handling Patterns
 
-### Top-Level Catch Pattern
+**To be filled by the team**: Document common error handling patterns used in your project.
 
-All command actions are wrapped in try-catch at the CLI level:
+Questions to answer:
+- How should errors be caught and handled at different layers?
+- When should errors be re-thrown vs. handled locally?
+- How should validation errors be handled?
+- How should external API errors be handled?
 
-```python
-def main() -> int:
-    parser = argparse.ArgumentParser(...)
-    args = parser.parse_args()
-    try:
-        return cmd_create(args)
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        return 1
-```
+---
 
-### Silent Failure for Optional Operations
+## Error Messages
 
-```python
-# Git config might not be available
-try:
-    developer_name = execSync("git config user.name", {
-      encoding: "utf-8",
-    }).trim();
-except {
-    # Git not available - silently ignore
-}
-```
+**To be filled by the team**: Document conventions for error messages.
 
-### Graceful Degradation with Warning
+Questions to answer:
+- What information should error messages include?
+- How should error messages be formatted?
+- Should error messages be user-facing or developer-facing?
+
+---
+
+## Examples
+
+**To be filled by the team**: Provide examples of good error handling from your project.
 
 ```python
-try:
-    result = subprocess.run(
-        ["git", "add", "-A", scope],
-        cwd=repo_root, capture_output=True
-    )
+# Example: To be filled by the team
     if result.returncode == 0:
         print("[OK] Auto-committed", file=sys.stderr)
     else:

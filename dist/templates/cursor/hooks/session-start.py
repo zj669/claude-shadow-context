@@ -207,14 +207,31 @@ Read and follow all instructions below carefully.
                 output.write(read_file(index_file))
                 output.write("\n\n")
 
-    output.write("</guidelines>\n")
+    output.write("</guidelines>\n\n")
+
+    output.write("<instructions>\n")
+    start_md = read_file(
+        Path(repo_root) / ".cursor" / "commands" / "bw" / "start.md", "No start.md found"
+    )
+    output.write(start_md)
+    output.write("\n</instructions>\n\n")
+
+    # Check task status and inject structured tag
+    task_status = get_task_status(trellis_dir)
+    output.write(f"<task-status>\n{task_status}\n</task-status>\n\n")
+
+    output.write("""<ready>
+Context loaded. Steps 1-3 (workflow, context, guidelines) are already injected above — do NOT re-read them.
+Start from Step 4. Wait for user's first message, then follow <instructions> to handle their request.
+If there is an active task, ask whether to continue it.
+</ready>""")
 
     result = {
         "allow": True,
         "message": output.getvalue()
     }
 
-    print(json.dumps(result, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":

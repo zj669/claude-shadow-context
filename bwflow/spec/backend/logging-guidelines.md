@@ -1,33 +1,50 @@
 # Logging Guidelines
 
-> Logging standards for Python scripts in this project.
+> **To be filled by the team**: Document your project's logging standards and practices.
 
 ---
 
 ## Overview
 
-This project uses the centralized `common/log.py` module for all Python script output. It provides consistent ANSI-colored output across all scripts.
+**To be filled by the team**: Describe your logging approach.
+
+Questions to answer:
+- What logging library/framework is used?
+- What log levels are available and when should each be used?
+- How are logs structured (plain text, JSON, etc.)?
 
 ---
 
-## Log Module API (`common/log.py`)
+## Log Levels
 
-| Export | Type | Description |
-|--------|------|-------------|
-| `Colors` | class | ANSI codes: `RED`, `GREEN`, `YELLOW`, `BLUE`, `CYAN`, `DIM`, `NC` |
-| `colored(text, color)` | function | Wrap text with color + reset |
-| `log_info(msg)` | function | `[INFO]` prefix (blue) |
-| `log_success(msg)` | function | `[SUCCESS]` prefix (green) |
-| `log_warn(msg)` | function | `[WARN]` prefix (yellow) |
-| `log_error(msg)` | function | `[ERROR]` prefix (red) |
+**To be filled by the team**: Document when to use each log level.
+
+Questions to answer:
+- DEBUG: When to use?
+- INFO: When to use?
+- WARNING: When to use?
+- ERROR: When to use?
+- CRITICAL: When to use?
 
 ---
 
-## Output Destinations
+## What to Log
 
-| Function | Destination | When to Use |
-|----------|-------------|-------------|
-| `log_info`, `log_success` | stdout | Normal operations, progress |
+**To be filled by the team**: Document what information should be logged.
+
+Questions to answer:
+- What events should be logged?
+- What context should be included in logs?
+- What should NOT be logged (e.g., sensitive data)?
+
+---
+
+## Examples
+
+**To be filled by the team**: Provide examples of good logging from your project.
+
+```python
+# Example: To be filled by the team
 | `log_warn` | stdout | Warnings, degraded functionality |
 | `log_error` | stdout | Errors (not stderr, for color consistency) |
 | `print(..., file=sys.stderr)` | stderr | Raw errors without formatting |
