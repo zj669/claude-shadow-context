@@ -68,19 +68,13 @@ cat .bwflow/blueprint/<module>/README.md
 
 Before any Q&A:
 
-1. **Get current context** (developer identity, git status, existing tasks):
-
-```bash
-python3 ./.bwflow/scripts/get_context.py
-```
-
-2. **Create task** if none exists:
+1. **Create task** if none exists:
 
 ```bash
 TASK_DIR=$(python3 ./.bwflow/scripts/task.py create "brainstorm: <short goal>" --slug <auto>)
 ```
 
-3. **Read existing blueprints** to understand current architecture:
+2. **Read existing blueprints** to understand current architecture:
 
 ```bash
 cat .bwflow/blueprint/README.md
@@ -88,7 +82,7 @@ cat .bwflow/blueprint/README.md
 cat .bwflow/blueprint/<module>/README.md
 ```
 
-4. **Seed PRD** with what you know:
+3. **Seed PRD** with what you know:
 
 ```markdown
 # brainstorm: <short goal>
