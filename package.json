@@ -1,6 +1,6 @@
 {
   "name": "@zj669/bwflow",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Blueprint Workflow CLI - 蓝图驱动的结构化 AI 开发伴侣",
   "type": "module",
   "bin": {
@@ -15,17 +15,28 @@
     "copy-templates": "cp -r src/templates dist/",
     "clean-legacy": "find dist/templates -type d -name 'bwflow' -exec rm -rf {} + 2>/dev/null || true",
     "dev": "tsc --watch",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "commander": "^11.1.0",
     "chalk": "^5.3.0",
+    "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
+    "giget": "^1.2.0",
+    "inquirer": "^9.0.0",
+    "ora": "^7.0.0",
     "yaml": "^2.3.4"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.10.0",
+    "fast-check": "^3.15.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
     "typescript": "^5.3.3"
   },
   "engines": {
